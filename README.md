@@ -120,7 +120,7 @@ Boxscores typically consist of a compact review of the game: date, location, and
 +                                                                              +
 ```
 
-The selection of stats here mirrors the [Wikipedia definition of a baseball box score](https://en.wikipedia.org/wiki/Box_score_(baseball).
+The selection of stats here mirrors the [Wikipedia definition of a baseball box score](https://en.wikipedia.org/wiki/Box_score_(baseball)).
 Good examples of box scores have different stuff, like [the Athletic's swaggy minimal boxscores](https://theathletic.com/mlb/game/stats/baltimore-orioles-vs-texas-rangers/hMFZtTS71GJ6jQy3/) or [Baseball-Reference's incomprehensibly technical ones](https://www.baseball-reference.com/boxes/TEX/TEX202304030.shtml).
 
 Final determination of the stats for this CLI program are yet to come.
