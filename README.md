@@ -124,3 +124,27 @@ The selection of stats here mirrors the [Wikipedia definition of a baseball box 
 Good examples of box scores have different stuff, like [the Athletic's swaggy minimal boxscores](https://theathletic.com/mlb/game/stats/baltimore-orioles-vs-texas-rangers/hMFZtTS71GJ6jQy3/) or [Baseball-Reference's incomprehensibly technical ones](https://www.baseball-reference.com/boxes/TEX/TEX202304030.shtml).
 
 Final determination of the stats for this CLI program are yet to come.
+
+## Data extraction
+
+Boxscore and linescore data are available from the MLB's back-end service which is used to populate various MLB apps.
+```
+https://statsapi.mlb.com/api/v1.1/game/${GAME_PK}/feed/live
+```
+will return a JSON file populated with a bunch of data from a given game.
+Interpreting the JSON and its contents as a dict `data`, we care about two particular nodes: `data['liveData']['linescore']` and `data['liveData']['boxscore']`.
+
+## Extra feature ideas
+
+### Run-scoring sparklines
+
+Using the period, `.`, colon, `:`, and inverted fullstop, `˙`, we can make run count sparklines:
+```
+                       .                     
+                       :   .       .         
+San Diego      0 0 0   3 0 1   0 0 1 - 5  9 0
+Baltimore      2 3 0   1 0 0   0 0 1 - 7 10 0
+               : :     ˙           ˙         
+                 ˙                            
+```
+
