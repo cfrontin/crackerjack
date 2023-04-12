@@ -10,16 +10,16 @@ Nowadays, nobody reads physical papers anymore, but nerds still use command line
 
 Dependencies:
 
-    - none, so far
+  - none, so far
 
 Instructions:
 
-    - navigate to the directory you want to install into
-    - activate a virtual environment (if desired; e.g. `conda activate boxscore-env`)
-    - `git clone git@github.com:cfrontin/boxscore-cli.git`
-    - run `cd boxscore-cli && pip install -e .`
-    - navigate out of the installation directory and its parent then make sure `boxscore` runs
-    - voilá
+  - navigate to the directory you want to install into
+  - activate a virtual environment (if desired; e.g. `conda activate boxscore-env`)
+  - `git clone git@github.com:cfrontin/boxscore-cli.git`
+  - run `cd boxscore-cli && pip install -e .`
+  - navigate out of the installation directory and its parent then make sure `boxscore` runs
+  - voilá
 
 ## CLI Design
 
