@@ -1,0 +1,47 @@
++ Sunday, 01 January 1921                                                      +
++ Orioles Park and Camden Yards                                                +
++                                                                              +
++   San Diego      0 0 0   0 0 0   0 0 0 - 0 0 0                               +
++   Baltimore      0 0 0   0 0 0   0 0 0 - 1 1 0                               +
++                                                                              +
++ SAN DIEGO PADRES                                                             +
++                                      + AB +  R +  H + RBI+ BB + SO + PO +  A +
++   McCringleberry, H. CF              +  0 +  0 +  0 +  0 +  0 +  0 +  0 +  0 +
++   Chonk, D. 2B                       +  0 +  0 +  0 +  0 +  0 +  0 +  0 +  0 +
++     Diesel, S. PH                    +  0 +  0 +  0 +  0 +  0 +  0 +  0 +  0 +
++     James, L. 3B                     +  0 +  0 +  0 +  0 +  0 +  0 +  0 +  0 +
++   Laser, M. 1B                       +  0 +  0 +  0 +  0 +  0 +  0 +  0 +  0 +
++   ...                                                                        +
++                                                                              +
++                                    +   IP +  H +  R + ER + BB + SO + HR + BFP+
++   Christmas, L.                    +  0.0 +  0 +  0 +  0 +  0 +  0 +  0 +  0 +
++   ...                                                                        +
++                                                                              +
++   FIELDING                                                                   +
++     DP: 1. Laser-James-Chonk                                                 +
++     E: James (4)                                                             +
++   BATTING                                                                    +
++     HR: Chonk                                                                +
++     HBP: Chonk                                                               +
++   BASERUNNING                                                                +
++     SB: Laser                                                                +
++                                                                              +
++ BALTIMORE ORIOLES                                                            +
++                                      + AB +  R +  H + RBI+ BB + SO + PO +  A +
++   Roberts, B. 2B                     +  0 +  0 +  0 +  0 +  0 +  0 +  0 +  0 +
++   Ripken Jr., C. SS                  +  0 +  0 +  0 +  0 +  0 +  0 +  0 +  0 +
++   Jones, A. CF                       +  0 +  0 +  0 +  0 +  0 +  0 +  0 +  0 +
++   ...                                                                        +
++                                                                              +
++                                    +   IP +  H +  R + ER + BB + SO + HR + BFP+
++  Means, J    .                     +  0.0 +  0 +  0 +  0 +  0 +  0 +  0 +  0 +
++  ...                                                                         +
++                                                                              +
++   FIELDING                                                                   +
++     E: Roberts (4)                                                           +
++   BATTING                                                                    +
++     HR: Jones                                                                +
++     HBP: Ripken Jr                                                           +
++   BASERUNNING                                                                +
++     CS: Roberts                                                              +
++                                                                              +
