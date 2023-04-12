@@ -109,6 +109,7 @@ def url_to_json(url_str: str):
         return data
     except urllib.request.HTTPError as e:
         print("\nrequest failed for URL:\n\t" + url_str + "\n")
+        print(e)
         return
 
 
@@ -161,7 +162,7 @@ def strip_boxscore_data(data_game: dict):
 
 
 def strip_teams_data(data_game: dict):
-    """ """
+    """strip and store the basic data for a team for line/boxscore presentation"""
 
     assert "gameData" in data_game
     data_gameData = data_game["gameData"]
