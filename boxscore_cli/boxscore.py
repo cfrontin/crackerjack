@@ -69,6 +69,118 @@ class Team(object):
         )
 
 
+class LineScoreInning(object):
+    """
+    store a linescore inning
+    """
+
+    _inn_no: int
+    _R_away: int
+    _H_away: int
+    _E_away: int
+    _LOB_away: int
+    _R_home: int
+    _H_home: int
+    _E_home: int
+    _LOB_home: int
+    _ordinal: str
+
+    @property
+    def inn_no(self):
+        return self._inn_no
+
+    @inn_no.setter
+    def inn_no(self, value):
+        self._inn_no = value
+
+    @property
+    def ordinal(self):
+        return self._ordinal
+
+    @ordinal.setter
+    def ordinal(self, value):
+        self._ordinal = value
+
+    @property
+    def R_away(self):
+        return self._R_away
+
+    @R_away.setter
+    def R_away(self, value):
+        self._R_away = value
+
+    @property
+    def H_away(self):
+        return self._H_away
+
+    @H_away.setter
+    def H_away(self, value):
+        self._H_away = value
+
+    @property
+    def E_away(self):
+        return self._E_away
+
+    @E_away.setter
+    def E_away(self, value):
+        self._E_away = value
+
+    @property
+    def LOB_away(self):
+        return self._LOB_away
+
+    @LOB_away.setter
+    def LOB_away(self, value):
+        self._LOB_away = value
+
+    @property
+    def R_home(self):
+        return self._R_home
+
+    @R_home.setter
+    def R_home(self, value):
+        self._R_home = value
+
+    @property
+    def H_home(self):
+        return self._H_home
+
+    @H_home.setter
+    def H_home(self, value):
+        self._H_home = value
+
+    @property
+    def E_home(self):
+        return self._E_home
+
+    @E_home.setter
+    def E_home(self, value):
+        self._E_home = value
+
+    @property
+    def LOB_home(self):
+        return self._LOB_home
+
+    @LOB_home.setter
+    def LOB_home(self, value):
+        self._LOB_home = value
+
+    def __init__(self, inn_no: int, away=[0, 0, 0, 0], home=[0, 0, 0, 0]):
+        """
+        create an inning object
+        """
+
+        self._inn_no = inn_no
+        self.R_away = away[0]
+        self.H_away = away[1]
+        self.E_away = away[2]
+        self.LOB_away = away[3] if len(away) > 3 else None
+        self.R_home = home[0]
+        self.H_home = home[1]
+        self.E_home = home[2]
+        self.LOB_home = home[3] if len(home) > 3 else None
+
+
 def print_dummy_linescore():
     """
     print a dummy linescore for demo purposes
@@ -99,7 +211,7 @@ def print_dummy_boxscore():
 
 def url_to_json(url_str: str):
     """
-    take a URL string, attempt to get the json hosted there
+    take a URL string, attempt to get the json hosted there, handle response errors
     """
 
     try:
@@ -183,6 +295,41 @@ def strip_teams_data(data_game: dict):
     return teams
 
 
+def strip_linescore_innings(data_game: dict):
+    data_linescore = strip_linescore_data(data_game)  # get the linescore data
+
+    lsi_list = list()
+
+    assert "innings" in data_linescore
+    for idx_inn, data_inning in enumerate(data_linescore["innings"]):
+        print("inn. idx.:", idx_inn)
+        print("\tinn. no.:", data_inning["num"], "(%s)" % data_inning["ordinalNum"])
+        lsi = LineScoreInning(data_inning["num"])
+        lsi.ordinal = data_inning["ordinalNum"]
+        lsi.R_away = data_inning["away"]["runs"]
+        lsi.H_away = data_inning["away"]["hits"]
+        lsi.E_away = data_inning["away"]["errors"]
+        lsi.LOB_away = data_inning["away"]["leftOnBase"]
+        lsi.R_home = (
+            data_inning["home"]["runs"] if "runs" in data_inning["home"] else None
+        )
+        lsi.H_home = (
+            data_inning["home"]["hits"] if "hits" in data_inning["home"] else None
+        )
+        lsi.E_home = (
+            data_inning["home"]["errors"] if "errors" in data_inning["home"] else None
+        )
+        lsi.LOB_home = (
+            data_inning["home"]["leftOnBase"]
+            if "leftOnBase" in data_inning["home"]
+            else None
+        )
+
+        lsi_list.append(lsi)
+
+    return lsi_list
+
+
 def main():
     ### parse CLI arguments
 
@@ -195,7 +342,7 @@ def main():
     parser.add_argument("-b", "--box", action="store_true", default=False)
     parser.add_argument("-g", "--game", action="store", default=None, type=int)
 
-    args, arg_filenames = parser.parse_known_args()
+    args = parser.parse_args()
 
     ### do functionality
 
@@ -216,6 +363,8 @@ def main():
         print()
         print(strip_teams_data(game_data)["away"])
         print(strip_teams_data(game_data)["home"])
+        print()
+        print(strip_linescore_innings(game_data))
         print()
         print(get_mlbapi_url_gamepk(args.game))
         print()
