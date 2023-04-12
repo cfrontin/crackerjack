@@ -9,9 +9,11 @@ Nowadays, nobody reads physical papers anymore, but nerds still use command line
 ## Installation
 
 Dependencies:
+
     - none, so far
 
 Instructions:
+
     - navigate to the directory you want to install into
     - activate a virtual environment (if desired; e.g. `conda activate boxscore-env`)
     - `git clone git@github.com:cfrontin/boxscore-cli.git`
