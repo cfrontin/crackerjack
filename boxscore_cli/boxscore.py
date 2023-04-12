@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import os.path
+import argparse
+
 
 APP_DIR = os.path.split(__file__)[0]
 
@@ -29,9 +31,25 @@ def print_dummy_boxscore():
 
 def main():
 
-    print_dummy_linescore()
+    ### parse CLI arguments
 
-    print_dummy_boxscore()
+    parser= argparse.ArgumentParser(
+            prog="boxscore",
+            description="cfrontin's CLI boxscore and linescore printer",
+            epilog="strike three!\a\n",
+            )
+    parser.add_argument("-l", "--line", action="store_true", default=False)
+    parser.add_argument("-b", "--box", action="store_true", default=False)
+
+    args, arg_filenames = parser.parse_known_args()
+
+    ### do functionality
+
+    if args.line:
+        print_dummy_linescore()
+
+    if args.box:
+        print_dummy_boxscore()
 
 if __name__ == "__main__":
     main()
