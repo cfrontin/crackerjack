@@ -12,6 +12,7 @@ import pprint as pp
 _APP_DIR = os.path.split(__file__)[0]  # where this file is installed
 _MLB_GAME_FORMAT_STRING = "https://statsapi.mlb.com/api/v1.1/game/%s/feed/live?hydrate=officials"  # 6 digit numeric gamepk as string
 _MLB_SCHEDULE_FORMAT_STRING = "https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=%s&endDate=%s"  # dates as string: '2023-01-01'
+_CLI_LINE_LENGTH_DEFAULT = 80
 
 
 class Team(object):
@@ -54,6 +55,15 @@ class Team(object):
         e.g. _BAL_ for Baltimore Orioles
         """
         return self._abbrev
+
+    @property
+    def full_name(self):
+        """
+        the full name of a team
+
+        e.g. "Baltimore Orioles" for Baltimore Orioles
+        """
+        return self.location_name + " " + self.team_name
 
     @property
     def is_home(self):
@@ -180,6 +190,26 @@ class LineScoreInning(object):
         self.E_home = home[2]
         self.LOB_home = home[3] if len(home) > 3 else None
 
+    def get_appetite(self) -> int:
+        """
+        figure out how many characters this inning needs to print
+        """
+
+        vars = [
+            self._inn_no,
+            self._R_away,
+            self._H_away,
+            self._E_away,
+            self._LOB_away,
+            self._R_home,
+            self._H_home,
+            self._E_home,
+            self._LOB_home,
+        ]
+
+        # return the longest length of the converted string
+        return max([len(str(var)) for var in vars if var is not None])
+
 
 def print_dummy_linescore():
     """
@@ -209,7 +239,7 @@ def print_dummy_boxscore():
     print()
 
 
-def url_to_json(url_str: str):
+def download_json_url(url_str: str):
     """
     take a URL string, attempt to get the json hosted there, handle response errors
     """
@@ -225,7 +255,7 @@ def url_to_json(url_str: str):
         return
 
 
-def get_mlbapi_url_gamepk(gamepk: int):
+def translate_gamepk2url(gamepk: int):
     """
     gake a game_pk integer and grab the gameday API link for the game
     """
@@ -234,18 +264,18 @@ def get_mlbapi_url_gamepk(gamepk: int):
     return _MLB_GAME_FORMAT_STRING % gamepk_str  # drop into format string and return
 
 
-def get_game_data(gamepk: int):
+def download_game_data(gamepk: int):
     """
     get the json of data from a given game
     """
 
-    url_str_game = get_mlbapi_url_gamepk(gamepk)  # get the correct mlbapi url
-    data_game = url_to_json(url_str_game)  # get the json from the link
+    url_str_game = translate_gamepk2url(gamepk)  # get the correct mlbapi url
+    data_game = download_json_url(url_str_game)  # get the json from the link
 
     return data_game  # return the game data
 
 
-def strip_linescore_data(data_game: dict):
+def extract_linescore_data(data_game: dict):
     """
     give a game_pk and get the linescore data
     """
@@ -259,7 +289,7 @@ def strip_linescore_data(data_game: dict):
     return linescore
 
 
-def strip_boxscore_data(data_game: dict):
+def extract_boxscore_data(data_game: dict):
     """
     give a game_pk and get the boxscore data
     """
@@ -273,8 +303,10 @@ def strip_boxscore_data(data_game: dict):
     return boxscore
 
 
-def strip_teams_data(data_game: dict):
-    """strip and store the basic data for a team for line/boxscore presentation"""
+def extract_teams_data(data_game: dict):
+    """
+    strip and store the basic data for a team for line/boxscore presentation
+    """
 
     assert "gameData" in data_game
     data_gameData = data_game["gameData"]
@@ -295,8 +327,12 @@ def strip_teams_data(data_game: dict):
     return teams
 
 
-def strip_linescore_innings(data_game: dict):
-    data_linescore = strip_linescore_data(data_game)  # get the linescore data
+def extract_linescore_innings(data_game: dict):
+    """
+    get the processed innings data from some game_data
+    """
+
+    data_linescore = extract_linescore_data(data_game)  # get the linescore data
 
     lsi_list = list()
 
@@ -330,6 +366,237 @@ def strip_linescore_innings(data_game: dict):
     return lsi_list
 
 
+def extract_RHE(linescoreinning_list: list[LineScoreInning]):
+    R_away = 0
+    R_home = 0
+    H_away = 0
+    H_home = 0
+    E_away = 0
+    E_home = 0
+    LOB_away = 0
+    LOB_home = 0
+
+    for lsi in linescoreinning_list:
+        R_away += lsi.R_away if lsi.R_away is not None else 0
+        R_home += lsi.R_home if lsi.R_home is not None else 0
+        H_away += lsi.H_away if lsi.H_away is not None else 0
+        H_home += lsi.H_home if lsi.H_home is not None else 0
+        E_away += lsi.E_away if lsi.E_away is not None else 0
+        E_home += lsi.E_home if lsi.E_home is not None else 0
+        LOB_away += lsi.LOB_away if lsi.LOB_away is not None else 0
+        LOB_home += lsi.LOB_home if lsi.LOB_home is not None else 0
+
+    RHE_dict = {}
+    RHE_dict["R"] = {
+        "spaces": max([len(str(x)) for x in [R_away, R_home]]),
+        "away": R_away,
+        "home": R_home,
+    }
+    RHE_dict["H"] = {
+        "spaces": max([len(str(x)) for x in [H_away, H_home]]),
+        "away": H_away,
+        "home": H_home,
+    }
+    RHE_dict["E"] = {
+        "spaces": max([len(str(x)) for x in [E_away, E_home]]),
+        "away": E_away,
+        "home": E_home,
+    }
+    RHE_dict["LOB"] = {
+        "spaces": max([len(str(x)) for x in [LOB_away, LOB_home]]),
+        "away": LOB_away,
+        "home": LOB_home,
+    }
+
+    return RHE_dict
+
+
+def format_linescore_render(
+    linescoreinning_list: list[LineScoreInning],
+    teams: dict[Team],
+    cross_char="+",
+    vert_char="|",
+    horz_char="-",
+    min_spaces_dense=2,
+    min_spaces_sparse=1,
+    indent_dense=0,
+    indent_sparse=2,
+):
+    # craete the format string
+    format_name_dense = ""
+    format_name_sparse = ""
+    format_line_dense = ""
+    format_line_sparse = ""
+
+    # create substitution sets for each line permutation
+    substitution_set_name_top_dense = []
+    substitution_set_name_away_dense = []
+    substitution_set_name_home_dense = []
+    substitution_set_name_top_sparse = []
+    substitution_set_name_away_sparse = []
+    substitution_set_name_home_sparse = []
+    substitution_set_line_top_dense = []
+    substitution_set_line_away_dense = []
+    substitution_set_line_home_dense = []
+    substitution_set_line_top_sparse = []
+    substitution_set_line_away_sparse = []
+    substitution_set_line_home_sparse = []
+
+    # start a count of the spaces
+    spaces_linescore_dense = 0
+    spaces_linescore_sparse = 0
+
+    # add the indentation
+    spaces_linescore_dense += indent_dense
+    format_name_dense += " " * indent_dense
+    spaces_linescore_sparse += indent_sparse
+    format_name_sparse += " " * indent_sparse
+
+    # add the stuff before the innings
+    spaces_linescore_dense += 2  # border char and one space before name
+    format_name_dense += "%1s "
+    substitution_set_name_top_dense.append(cross_char)
+    substitution_set_name_away_dense.append(vert_char)
+    substitution_set_name_home_dense.append(vert_char)
+    spaces_linescore_dense += 3  # border char and one space (at least) after name
+    format_line_dense += " %1s "
+    substitution_set_line_top_dense.append(cross_char)
+    substitution_set_line_away_dense.append(cross_char)
+    substitution_set_line_home_dense.append(cross_char)
+    spaces_linescore_sparse += 2  # border char and one space before name
+    format_name_sparse += ""
+    spaces_linescore_sparse += 1  # border char and one space (at least) after name
+    format_line_sparse += " "
+
+    # loop through the innings, formatting on the fly
+    for idx_lsi, lsi in enumerate(linescoreinning_list):
+        # spaces_linescore_dense += 1 # border char before
+        spaces_linescore_dense += 1  # buffer space before
+        spaces_linescore_dense += max(
+            lsi.get_appetite(), min_spaces_dense
+        )  # spaces needed for this lsi element
+        spaces_linescore_dense += 1  # buffer space after
+        spaces_linescore_dense += 1  # border char after
+        format_line_dense += (
+            " %" + str(max(lsi.get_appetite(), min_spaces_dense)) + "s %1s"
+        )
+        substitution_set_line_top_dense.append(lsi.inn_no)
+        substitution_set_line_away_dense.append(lsi.R_away)
+        substitution_set_line_home_dense.append(
+            lsi.R_home if lsi.R_home is not None else " " * lsi.get_appetite()
+        )
+        substitution_set_line_top_dense.append(cross_char)
+        substitution_set_line_away_dense.append(cross_char)
+        substitution_set_line_home_dense.append(cross_char)
+
+        if (idx_lsi % 3 == 0) and (idx_lsi != 0):
+            spaces_linescore_sparse += 2  # every three innings, add extra spaces before
+            format_line_sparse += "  "
+        spaces_linescore_sparse += max(
+            lsi.get_appetite(), min_spaces_sparse
+        )  # space needed for this lsi element
+        spaces_linescore_sparse += 1  # buffer space after
+        format_line_sparse += (
+            "%" + str(max(lsi.get_appetite(), min_spaces_sparse)) + "s "
+        )
+        substitution_set_line_top_sparse.append(lsi.inn_no)
+        substitution_set_line_away_sparse.append(lsi.R_away)
+        substitution_set_line_home_sparse.append(
+            lsi.R_home if lsi.R_home is not None else " " * lsi.get_appetite()
+        )
+
+    # work on RHE ending
+    spaces_linescore_sparse += 2  # buffer spaces before summary
+    format_line_sparse += " -"
+    RHE_dict = extract_RHE(linescoreinning_list)  # get the RHE stuff
+    for RHEcode in ["R", "H", "E"]:
+        spaces_linescore_dense += 1  # buffer space before summary term
+        spaces_linescore_dense += RHE_dict[RHEcode]["spaces"]
+        spaces_linescore_dense += 1  # buffer space after summary term
+        spaces_linescore_dense += 1  # border char after summary term
+        format_line_dense += " %" + str(RHE_dict[RHEcode]["spaces"]) + "s %1s"
+        substitution_set_line_top_dense.append(RHEcode)
+        substitution_set_line_away_dense.append(RHE_dict[RHEcode]["away"])
+        substitution_set_line_home_dense.append(RHE_dict[RHEcode]["home"])
+        substitution_set_line_top_dense.append(cross_char)
+        substitution_set_line_away_dense.append(cross_char)
+        substitution_set_line_home_dense.append(cross_char)
+
+        spaces_linescore_sparse += 1  # buffer spaces before summary term
+        spaces_linescore_sparse += RHE_dict[RHEcode]["spaces"]
+        format_line_sparse += " %" + str(RHE_dict[RHEcode]["spaces"]) + "s"
+        substitution_set_line_top_sparse.append(RHEcode)
+        substitution_set_line_away_sparse.append(RHE_dict[RHEcode]["away"])
+        substitution_set_line_home_sparse.append(RHE_dict[RHEcode]["home"])
+
+    residual_spaces_dense = _CLI_LINE_LENGTH_DEFAULT - spaces_linescore_dense
+    residual_spaces_sparse = _CLI_LINE_LENGTH_DEFAULT - spaces_linescore_sparse
+
+    spaces_team_fullname = max([len(team.full_name) for team in teams.values()])
+    spaces_team_cityname = max([len(team.location_name) for team in teams.values()])
+
+    name_use_dense = ""
+    if residual_spaces_dense > spaces_team_fullname:
+        format_name_dense += (
+            "%" + str(residual_spaces_dense) + "s"
+        )  # fill remaining spaces
+        substitution_set_name_top_dense.append(horz_char * residual_spaces_dense)
+        substitution_set_name_away_dense.append(teams["away"].full_name)
+        substitution_set_name_home_dense.append(teams["home"].full_name)
+    elif residual_spaces_dense > spaces_team_cityname:
+        format_name_dense += (
+            "%-" + str(residual_spaces_dense) + "s"
+        )  # fill remaining spaces
+        substitution_set_name_top_dense.append(horz_char * residual_spaces_dense)
+        substitution_set_name_away_dense.append(teams["away"].location_name)
+        substitution_set_name_home_dense.append(teams["home"].location_name)
+    else:
+        magic_number = max(3, residual_spaces_dense)
+        format_name_dense += "%" + str(magic_number) + "s"
+        substitution_set_name_top_dense.append(horz_char * magic_number)
+        substitution_set_name_away_dense.append(teams["away"].abbrev)
+        substitution_set_name_home_dense.append(teams["home"].abbrev)
+    format_name_sparse += "%3s  "
+    substitution_set_name_top_sparse.append(horz_char * 3)
+    substitution_set_name_away_sparse.append(teams["away"].abbrev)
+    substitution_set_name_home_sparse.append(teams["home"].abbrev)
+
+    # print the results (DEBUG!!!!!)
+    print()
+    print("spaces_team_fullname:", spaces_team_fullname)
+    print()
+    print("\nfilled line (dense):\n")
+    print(
+        (format_name_dense % tuple(substitution_set_name_top_dense))
+        + (format_line_dense % tuple(substitution_set_line_top_dense))
+    )
+    print(
+        (
+            (format_name_dense % tuple(substitution_set_name_away_dense))
+            + (format_line_dense % tuple(substitution_set_line_away_dense))
+        )
+    )
+    print(
+        (
+            (format_name_dense % tuple(substitution_set_name_home_dense))
+            + (format_line_dense % tuple(substitution_set_line_home_dense))
+        )
+    )
+    print("\nfilled line (sparse):\n")
+    print(
+        (
+            (format_name_sparse % tuple(substitution_set_name_away_sparse))
+            + (format_line_sparse % tuple(substitution_set_line_away_sparse))
+        )
+    )
+    print(
+        (
+            (format_name_sparse % tuple(substitution_set_name_home_sparse))
+            + (format_line_sparse % tuple(substitution_set_line_home_sparse))
+        )
+    )
+
+
 def main():
     ### parse CLI arguments
 
@@ -353,20 +620,26 @@ def main():
         print_dummy_boxscore()
 
     if args.game:  # exploration mode
-        game_data = get_game_data(args.game)
+        game_data = download_game_data(args.game)
         print()
         pp.pprint(game_data, compact=True, indent=1, depth=2)
         print()
-        pp.pprint(strip_linescore_data(game_data), compact=True, indent=1, depth=2)
+        pp.pprint(extract_linescore_data(game_data), compact=True, indent=1, depth=2)
         # print()
         # pp.pprint(strip_boxscore_data(game_data), compact=True, indent=1, depth=2)
         print()
-        print(strip_teams_data(game_data)["away"])
-        print(strip_teams_data(game_data)["home"])
+        print(extract_teams_data(game_data)["away"])
+        print(extract_teams_data(game_data)["home"])
         print()
-        print(strip_linescore_innings(game_data))
+        print(extract_linescore_innings(game_data))
         print()
-        print(get_mlbapi_url_gamepk(args.game))
+        print([x.get_appetite() for x in extract_linescore_innings(game_data)])
+        print()
+        format_linescore_render(
+            extract_linescore_innings(game_data), extract_teams_data(game_data)
+        )
+        print()
+        print(translate_gamepk2url(args.game))
         print()
 
 
