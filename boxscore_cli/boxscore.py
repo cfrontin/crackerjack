@@ -300,6 +300,40 @@ def extract_venue_name(data_game: dict):
     return data_game["gameData"]["venue"]["name"]
 
 
+def extract_decisions(data_game: dict):
+    """
+    give a game data dict and get the pitching decision
+    """
+
+    assert "liveData" in data_game
+    data_liveData = data_game["liveData"]
+
+    wp = None
+    lp = None
+    sv = None
+
+    # if no decisions are posted, dump all Nones
+    if "decisions" not in data_liveData:
+        return (wp, lp, sv)
+
+    # if they are, hold their data in a useful config
+    data_decisions = data_liveData["decisions"]
+
+    # for each key, if it exists, extract player name into var
+    # assume last token is last name
+    if "winner" in data_decisions:
+        wp = data_decisions["winner"]["fullName"].split(" ")[-1]
+    if "loser" in data_decisions:
+        lp = data_decisions["loser"]["fullName"].split(" ")[-1]
+    if "save" in data_decisions:
+        sv = data_decisions["save"]["fullName"].split(" ")[-1]
+
+    # dict w/ value if extracted or else None
+    decision_dict = {"WP": wp, "LP": lp, "SV": sv}
+
+    return decision_dict
+
+
 def extract_linescore_data(data_game: dict):
     """
     give a game data dict and get the linescore data
@@ -439,6 +473,7 @@ def extract_RHE(linescoreinning_list: list[LineScoreInning]):
 def format_linescore(
     linescoreinning_list: list[LineScoreInning],
     teams: dict[Team],
+    decision_dict=None,
     venue=None,
     cross_char="+",
     vert_char="|",
@@ -447,7 +482,7 @@ def format_linescore(
     min_spaces_sparse=1,
     indent_dense=0,
     indent_sparse=2,
-    dense_venue_suffix=True,
+    force_uppercase_team=True,
 ):
     # craete the format string
     format_name_dense = ""
@@ -570,22 +605,26 @@ def format_linescore(
     spaces_team_fullname = max([len(team.full_name) for team in teams.values()])
     spaces_team_cityname = max([len(team.location_name) for team in teams.values()])
 
-    name_use_dense = ""
+    def dtf(x_in):
+        if force_uppercase_team:
+            return x_in.upper()
+        return x_in  # pass through
+
     if residual_spaces_dense > spaces_team_fullname:
         format_name_dense += (
             "%" + str(residual_spaces_dense) + "s"
         )  # fill remaining spaces
         substitution_set_name_top_dense.append(horz_char * residual_spaces_dense)
-        substitution_set_name_away_dense.append(teams["away"].full_name)
-        substitution_set_name_home_dense.append(teams["home"].full_name)
+        substitution_set_name_away_dense.append(dtf(teams["away"].full_name))
+        substitution_set_name_home_dense.append(dtf(teams["home"].full_name))
         substitution_set_name_bot_dense.append(horz_char * residual_spaces_dense)
     elif residual_spaces_dense > spaces_team_cityname:
         format_name_dense += (
             "%-" + str(residual_spaces_dense) + "s"
         )  # fill remaining spaces
         substitution_set_name_top_dense.append(horz_char * residual_spaces_dense)
-        substitution_set_name_away_dense.append(teams["away"].location_name)
-        substitution_set_name_home_dense.append(teams["home"].location_name)
+        substitution_set_name_away_dense.append(dtf(teams["away"].location_name))
+        substitution_set_name_home_dense.append(dtf(teams["home"].location_name))
         substitution_set_name_bot_dense.append(horz_char * residual_spaces_dense)
     else:
         magic_number = max(3, residual_spaces_dense)
@@ -629,12 +668,12 @@ def format_linescore(
         + (format_line_sparse % tuple(substitution_set_line_home_sparse))
     )
 
-    if dense_venue_suffix and venue is not None:
+    if venue is not None:
         venue_line = " " * indent_dense
         venue_line += cross_char + " "
         venue = " " + venue + " "  # add leading and trailing space
         venue_line_ending = cross_char + horz_char * 3 + cross_char
-        no_fill_horz_char = (
+        fill_horz_char_venue = (
             _CLI_LINE_LENGTH_DEFAULT
             - len(venue_line)
             - len(venue)
@@ -642,9 +681,28 @@ def format_linescore(
             - 1
         )
         venue_line += (
-            horz_char * no_fill_horz_char + cross_char + venue + venue_line_ending
+            horz_char * fill_horz_char_venue
+            + cross_char
+            + dtf(venue)
+            + venue_line_ending
         )
         lines_dense.append(venue_line)
+
+    if decision_dict is not None:
+        decision_line = " " * indent_dense
+        decision_line += cross_char + horz_char * 3 + cross_char
+        spacer = cross_char + horz_char + cross_char
+        dec_list = []
+        for key in ["WP", "LP", "SV"]:
+            if decision_dict[key] is not None:
+                dec_list.append("%s: " % key + decision_dict[key])
+        for idx_dec, dec_val in enumerate(dec_list):
+            decision_line += " " + dtf(dec_val) + " " + cross_char
+            if idx_dec + 1 < len(dec_list):
+                decision_line += spacer
+        fill_horz_char_decision = _CLI_LINE_LENGTH_DEFAULT - len(decision_line) - 1
+        decision_line += horz_char * fill_horz_char_decision + cross_char
+        lines_dense.append(decision_line)
 
     return lines_dense, lines_sparse
 
@@ -672,6 +730,7 @@ def main():
             extract_linescore_innings(game_data),
             extract_teams_data(game_data),
             venue=extract_venue_name(game_data),
+            decision_dict=extract_decisions(game_data),
         )
         print()
         [print(line) for line in dense_lines]
@@ -699,7 +758,10 @@ def main():
         print([x.get_appetite() for x in extract_linescore_innings(game_data)])
         print()
         lines_dense, lines_sparse = format_linescore(
-            extract_linescore_innings(game_data), extract_teams_data(game_data)
+            extract_linescore_innings(game_data),
+            extract_teams_data(game_data),
+            venue=extract_venue_name(game_data),
+            decision_dict=extract_decisions(game_data),
         )
         print("dense linescore:\n")
         [print(x) for x in lines_dense]
@@ -708,6 +770,8 @@ def main():
         [print(x) for x in lines_sparse]
         print()
         print(translate_gamepk2url(args.game))
+        print()
+        print(extract_decisions(game_data))
         print()
 
 
