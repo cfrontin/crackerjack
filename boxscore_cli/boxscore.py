@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import os.path
 import argparse
 import json
@@ -10,6 +11,7 @@ import pprint as pp
 
 # some private global variables
 _APP_DIR = os.path.split(__file__)[0]  # where this file is installed
+_PKG_DIR = os.path.join(_APP_DIR, os.pardir)  # where this package is installed
 _MLB_GAME_FORMAT_STRING = "https://statsapi.mlb.com/api/v1.1/game/%s/feed/live?hydrate=officials"  # 6 digit numeric gamepk as string
 _MLB_SCHEDULE_FORMAT_STRING = "https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=%s&endDate=%s"  # dates as string: '2023-01-01'
 _CLI_LINE_LENGTH_DEFAULT = 80
@@ -239,10 +241,18 @@ def print_dummy_boxscore():
     print()
 
 
-def download_json_url(url_str: str):
+def download_json_url(url_str: str, debug_file_loader=None):
     """
     take a URL string, attempt to get the json hosted there, handle response errors
     """
+
+    if debug_file_loader is not None:
+        assert os.path.exists(debug_file_loader), (
+            "json file at %s must exist." % debug_file_loader
+        )
+        with open(debug_file_loader, "r") as debug_file:
+            data = json.load(debug_file)
+        return data
 
     try:
         with urllib.request.urlopen(url_str) as url:
@@ -264,20 +274,35 @@ def translate_gamepk2url(gamepk: int):
     return _MLB_GAME_FORMAT_STRING % gamepk_str  # drop into format string and return
 
 
-def download_game_data(gamepk: int):
+def download_game_data(gamepk: int, debug=False):
     """
     get the json of data from a given game
     """
 
     url_str_game = translate_gamepk2url(gamepk)  # get the correct mlbapi url
-    data_game = download_json_url(url_str_game)  # get the json from the link
+    debug_filename = os.path.join(_PKG_DIR, "%d.json" % gamepk)
+    data_game = download_json_url(
+        url_str_game, debug_file_loader=None if not debug else debug_filename
+    )  # get the json from the link
 
     return data_game  # return the game data
 
 
+def extract_venue_name(data_game: dict):
+    """
+    give a game data dict and get the venue name for printing
+    """
+
+    assert "gameData" in data_game
+    assert "venue" in data_game["gameData"]
+    assert "name" in data_game["gameData"]["venue"]
+
+    return data_game["gameData"]["venue"]["name"]
+
+
 def extract_linescore_data(data_game: dict):
     """
-    give a game_pk and get the linescore data
+    give a game data dict and get the linescore data
     """
 
     assert "liveData" in data_game
@@ -338,8 +363,8 @@ def extract_linescore_innings(data_game: dict):
 
     assert "innings" in data_linescore
     for idx_inn, data_inning in enumerate(data_linescore["innings"]):
-        print("inn. idx.:", idx_inn)
-        print("\tinn. no.:", data_inning["num"], "(%s)" % data_inning["ordinalNum"])
+        # print("inn. idx.:", idx_inn)
+        # print("\tinn. no.:", data_inning["num"], "(%s)" % data_inning["ordinalNum"])
         lsi = LineScoreInning(data_inning["num"])
         lsi.ordinal = data_inning["ordinalNum"]
         lsi.R_away = data_inning["away"]["runs"]
@@ -411,9 +436,10 @@ def extract_RHE(linescoreinning_list: list[LineScoreInning]):
     return RHE_dict
 
 
-def format_linescore_render(
+def format_linescore(
     linescoreinning_list: list[LineScoreInning],
     teams: dict[Team],
+    venue=None,
     cross_char="+",
     vert_char="|",
     horz_char="-",
@@ -421,6 +447,7 @@ def format_linescore_render(
     min_spaces_sparse=1,
     indent_dense=0,
     indent_sparse=2,
+    dense_venue_suffix=True,
 ):
     # craete the format string
     format_name_dense = ""
@@ -432,12 +459,14 @@ def format_linescore_render(
     substitution_set_name_top_dense = []
     substitution_set_name_away_dense = []
     substitution_set_name_home_dense = []
+    substitution_set_name_bot_dense = []
     substitution_set_name_top_sparse = []
     substitution_set_name_away_sparse = []
     substitution_set_name_home_sparse = []
     substitution_set_line_top_dense = []
     substitution_set_line_away_dense = []
     substitution_set_line_home_dense = []
+    substitution_set_line_bot_dense = []
     substitution_set_line_top_sparse = []
     substitution_set_line_away_sparse = []
     substitution_set_line_home_sparse = []
@@ -458,11 +487,13 @@ def format_linescore_render(
     substitution_set_name_top_dense.append(cross_char)
     substitution_set_name_away_dense.append(vert_char)
     substitution_set_name_home_dense.append(vert_char)
+    substitution_set_name_bot_dense.append(cross_char)
     spaces_linescore_dense += 3  # border char and one space (at least) after name
     format_line_dense += " %1s "
     substitution_set_line_top_dense.append(cross_char)
     substitution_set_line_away_dense.append(cross_char)
     substitution_set_line_home_dense.append(cross_char)
+    substitution_set_line_bot_dense.append(cross_char)
     spaces_linescore_sparse += 2  # border char and one space before name
     format_name_sparse += ""
     spaces_linescore_sparse += 1  # border char and one space (at least) after name
@@ -485,9 +516,11 @@ def format_linescore_render(
         substitution_set_line_home_dense.append(
             lsi.R_home if lsi.R_home is not None else " " * lsi.get_appetite()
         )
+        substitution_set_line_bot_dense.append(horz_char * lsi.get_appetite())
         substitution_set_line_top_dense.append(cross_char)
         substitution_set_line_away_dense.append(cross_char)
         substitution_set_line_home_dense.append(cross_char)
+        substitution_set_line_bot_dense.append(cross_char)
 
         if (idx_lsi % 3 == 0) and (idx_lsi != 0):
             spaces_linescore_sparse += 2  # every three innings, add extra spaces before
@@ -518,9 +551,11 @@ def format_linescore_render(
         substitution_set_line_top_dense.append(RHEcode)
         substitution_set_line_away_dense.append(RHE_dict[RHEcode]["away"])
         substitution_set_line_home_dense.append(RHE_dict[RHEcode]["home"])
+        substitution_set_line_bot_dense.append(horz_char * RHE_dict[RHEcode]["spaces"])
         substitution_set_line_top_dense.append(cross_char)
         substitution_set_line_away_dense.append(cross_char)
         substitution_set_line_home_dense.append(cross_char)
+        substitution_set_line_bot_dense.append(cross_char)
 
         spaces_linescore_sparse += 1  # buffer spaces before summary term
         spaces_linescore_sparse += RHE_dict[RHEcode]["spaces"]
@@ -543,6 +578,7 @@ def format_linescore_render(
         substitution_set_name_top_dense.append(horz_char * residual_spaces_dense)
         substitution_set_name_away_dense.append(teams["away"].full_name)
         substitution_set_name_home_dense.append(teams["home"].full_name)
+        substitution_set_name_bot_dense.append(horz_char * residual_spaces_dense)
     elif residual_spaces_dense > spaces_team_cityname:
         format_name_dense += (
             "%-" + str(residual_spaces_dense) + "s"
@@ -550,51 +586,67 @@ def format_linescore_render(
         substitution_set_name_top_dense.append(horz_char * residual_spaces_dense)
         substitution_set_name_away_dense.append(teams["away"].location_name)
         substitution_set_name_home_dense.append(teams["home"].location_name)
+        substitution_set_name_bot_dense.append(horz_char * residual_spaces_dense)
     else:
         magic_number = max(3, residual_spaces_dense)
         format_name_dense += "%" + str(magic_number) + "s"
         substitution_set_name_top_dense.append(horz_char * magic_number)
         substitution_set_name_away_dense.append(teams["away"].abbrev)
         substitution_set_name_home_dense.append(teams["home"].abbrev)
+        substitution_set_name_bot_dense.append(horz_char * magic_number)
     format_name_sparse += "%3s  "
     substitution_set_name_top_sparse.append(horz_char * 3)
     substitution_set_name_away_sparse.append(teams["away"].abbrev)
     substitution_set_name_home_sparse.append(teams["home"].abbrev)
 
+    lines_dense = []
+    lines_sparse = []
+
     # print the results (DEBUG!!!!!)
-    print()
-    print("spaces_team_fullname:", spaces_team_fullname)
-    print()
-    print("\nfilled line (dense):\n")
-    print(
+    lines_dense.append(
         (format_name_dense % tuple(substitution_set_name_top_dense))
         + (format_line_dense % tuple(substitution_set_line_top_dense))
     )
-    print(
-        (
-            (format_name_dense % tuple(substitution_set_name_away_dense))
-            + (format_line_dense % tuple(substitution_set_line_away_dense))
-        )
+    lines_dense.append(
+        (format_name_dense % tuple(substitution_set_name_away_dense))
+        + (format_line_dense % tuple(substitution_set_line_away_dense))
     )
-    print(
-        (
-            (format_name_dense % tuple(substitution_set_name_home_dense))
-            + (format_line_dense % tuple(substitution_set_line_home_dense))
-        )
+    lines_dense.append(
+        (format_name_dense % tuple(substitution_set_name_home_dense))
+        + (format_line_dense % tuple(substitution_set_line_home_dense))
     )
-    print("\nfilled line (sparse):\n")
-    print(
-        (
-            (format_name_sparse % tuple(substitution_set_name_away_sparse))
-            + (format_line_sparse % tuple(substitution_set_line_away_sparse))
-        )
+    lines_dense.append(
+        (format_name_dense % tuple(substitution_set_name_bot_dense))
+        + (format_line_dense % tuple(substitution_set_line_bot_dense))
     )
-    print(
-        (
-            (format_name_sparse % tuple(substitution_set_name_home_sparse))
-            + (format_line_sparse % tuple(substitution_set_line_home_sparse))
-        )
+
+    lines_sparse.append(
+        (format_name_sparse % tuple(substitution_set_name_away_sparse))
+        + (format_line_sparse % tuple(substitution_set_line_away_sparse))
     )
+    lines_sparse.append(
+        (format_name_sparse % tuple(substitution_set_name_home_sparse))
+        + (format_line_sparse % tuple(substitution_set_line_home_sparse))
+    )
+
+    if dense_venue_suffix and venue is not None:
+        venue_line = " " * indent_dense
+        venue_line += cross_char + " "
+        venue = " " + venue + " "  # add leading and trailing space
+        venue_line_ending = cross_char + horz_char * 3 + cross_char
+        no_fill_horz_char = (
+            _CLI_LINE_LENGTH_DEFAULT
+            - len(venue_line)
+            - len(venue)
+            - len(venue_line_ending)
+            - 1
+        )
+        venue_line += (
+            horz_char * no_fill_horz_char + cross_char + venue + venue_line_ending
+        )
+        lines_dense.append(venue_line)
+
+    return lines_dense, lines_sparse
 
 
 def main():
@@ -608,19 +660,30 @@ def main():
     parser.add_argument("-l", "--line", action="store_true", default=False)
     parser.add_argument("-b", "--box", action="store_true", default=False)
     parser.add_argument("-g", "--game", action="store", default=None, type=int)
+    parser.add_argument("--debug", action="store_true", default=False)
 
     args = parser.parse_args()
 
     ### do functionality
 
     if args.line:
-        print_dummy_linescore()
+        game_data = download_game_data(args.game, debug=True)
+        dense_lines, _ = format_linescore(
+            extract_linescore_innings(game_data),
+            extract_teams_data(game_data),
+            venue=extract_venue_name(game_data),
+        )
+        print()
+        [print(line) for line in dense_lines]
+        print()
+        # # OLD DUMMY VERSION
+        # print_dummy_linescore()
 
     if args.box:
         print_dummy_boxscore()
 
-    if args.game:  # exploration mode
-        game_data = download_game_data(args.game)
+    if args.game and (not args.line):  # exploration mode
+        game_data = download_game_data(args.game, debug=True)
         print()
         pp.pprint(game_data, compact=True, indent=1, depth=2)
         print()
@@ -635,9 +698,14 @@ def main():
         print()
         print([x.get_appetite() for x in extract_linescore_innings(game_data)])
         print()
-        format_linescore_render(
+        lines_dense, lines_sparse = format_linescore(
             extract_linescore_innings(game_data), extract_teams_data(game_data)
         )
+        print("dense linescore:\n")
+        [print(x) for x in lines_dense]
+        print()
+        print("sparse linescore:\n")
+        [print(x) for x in lines_sparse]
         print()
         print(translate_gamepk2url(args.game))
         print()

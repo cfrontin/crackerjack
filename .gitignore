@@ -1,3 +1,10 @@
+
+### application specific stuff
+
+*.json
+
+### github python suggestions
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
