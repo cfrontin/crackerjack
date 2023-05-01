@@ -5,6 +5,7 @@ import os.path
 import argparse
 import json
 import copy
+from collections import OrderedDict
 
 import urllib.request
 import pprint as pp
@@ -15,6 +16,59 @@ _PKG_DIR = os.path.join(_APP_DIR, os.pardir)  # where this package is installed
 _MLB_GAME_FORMAT_STRING = "https://statsapi.mlb.com/api/v1.1/game/%s/feed/live?hydrate=officials"  # 6 digit numeric gamepk as string
 _MLB_SCHEDULE_FORMAT_STRING = "https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=%s&endDate=%s"  # dates as string: '2023-01-01'
 _CLI_LINE_LENGTH_DEFAULT = 80
+
+# labels known to the mlbapi
+_MLBAM_GAME_LABELS = [
+    "Game Scores",
+    "WP",
+    "Balk",
+    "IBB",
+    "HBP",
+    "Pitches-strikes",
+    "Groundouts-flyouts",
+    "Batters faced",
+    "Inherited runners-scored",
+    "Pitch timer violations",
+    "Umpires",
+    "Weather",
+    "Wind",
+    "First pitch",
+    "T",
+    "Att",
+    "Venue",
+]
+_MLBAM_TEAM_TYPES = [
+    "BATTING",
+    "BASERUNNING",
+    "FIELDING",
+]
+_MLBAM_TEAM_BATTING_LABELS = [
+    "2b",
+    "3b",
+    "HR",
+    "TB",
+    "RB",
+    "2-out RBI",
+    "Runners left in scoring position, 2 out",
+    "SAC",
+    "SF",
+    "GIDP",
+    "Team RISP",
+    "Team LOB||",
+]
+_MLBAM_TEAM_BASERUNNING_LABELS = [
+    "SB",
+    "CS",
+    "PO",
+]
+_MLBAM_TEAM_FIELDING_LABELS = [
+    "E",
+    "DP",
+    "TP",
+    "PB",
+    "Outfield assists",
+    "Pickoffs",
+]
 
 
 class Team(object):
@@ -334,7 +388,7 @@ def extract_decisions(data_game: dict):
     return decision_dict
 
 
-def extract_linescore_data(data_game: dict):
+def extract_linescore_data(data_game: dict) -> dict:
     """
     give a game data dict and get the linescore data
     """
@@ -348,21 +402,7 @@ def extract_linescore_data(data_game: dict):
     return linescore
 
 
-def extract_boxscore_data(data_game: dict):
-    """
-    give a game_pk and get the boxscore data
-    """
-
-    assert "liveData" in data_game
-    data_liveData = data_game["liveData"]
-
-    assert "boxscore" in data_liveData
-    boxscore = copy.deepcopy(data_liveData["boxscore"])
-
-    return boxscore
-
-
-def extract_teams_data(data_game: dict):
+def extract_teams_data(data_game: dict) -> dict[str:Team]:
     """
     strip and store the basic data for a team for line/boxscore presentation
     """
@@ -483,7 +523,13 @@ def format_linescore(
     indent_dense=0,
     indent_sparse=2,
     force_uppercase_team=True,
-):
+    use_top_spacing_line=False,
+    use_bottom_spacing_line=False,
+) -> list[str]:
+    """
+    TODO: create this documentation
+    """
+
     # craete the format string
     format_name_dense = ""
     format_name_sparse = ""
@@ -646,6 +692,11 @@ def format_linescore(
         (format_name_dense % tuple(substitution_set_name_top_dense))
         + (format_line_dense % tuple(substitution_set_line_top_dense))
     )
+    if use_top_spacing_line:
+        lines_dense.append(
+            (format_name_dense % tuple(substitution_set_name_bot_dense))
+            + (format_line_dense % tuple(substitution_set_line_bot_dense))
+        )
     lines_dense.append(
         (format_name_dense % tuple(substitution_set_name_away_dense))
         + (format_line_dense % tuple(substitution_set_line_away_dense))
@@ -654,10 +705,11 @@ def format_linescore(
         (format_name_dense % tuple(substitution_set_name_home_dense))
         + (format_line_dense % tuple(substitution_set_line_home_dense))
     )
-    lines_dense.append(
-        (format_name_dense % tuple(substitution_set_name_bot_dense))
-        + (format_line_dense % tuple(substitution_set_line_bot_dense))
-    )
+    if use_bottom_spacing_line:
+        lines_dense.append(
+            (format_name_dense % tuple(substitution_set_name_bot_dense))
+            + (format_line_dense % tuple(substitution_set_line_bot_dense))
+        )
 
     lines_sparse.append(
         (format_name_sparse % tuple(substitution_set_name_away_sparse))
@@ -697,14 +749,196 @@ def format_linescore(
             if decision_dict[key] is not None:
                 dec_list.append("%s: " % key + decision_dict[key])
         for idx_dec, dec_val in enumerate(dec_list):
-            decision_line += " " + dtf(dec_val) + " " + cross_char
+            decision_line += " " + dtf(dec_val) + " "
             if idx_dec + 1 < len(dec_list):
                 decision_line += spacer
+            else:
+                decision_line += cross_char
         fill_horz_char_decision = _CLI_LINE_LENGTH_DEFAULT - len(decision_line) - 1
         decision_line += horz_char * fill_horz_char_decision + cross_char
         lines_dense.append(decision_line)
 
     return lines_dense, lines_sparse
+
+
+def extract_boxscore_data(data_game: dict) -> dict:
+    """
+    give a game_pk and get the boxscore data
+    """
+
+    assert "liveData" in data_game
+    data_liveData = data_game["liveData"]
+
+    assert "boxscore" in data_liveData
+    boxscore = copy.deepcopy(data_liveData["boxscore"])
+
+    return boxscore
+
+
+def extract_gamedate(data_game: dict) -> dict:
+    """
+    give a game data dict and get the date of the game
+    """
+
+    assert "liveData" in data_game
+    assert "boxscore" in data_game["liveData"]
+    assert "info" in data_game["liveData"]["boxscore"]
+
+    info_of_interest = data_game["liveData"]["boxscore"]["info"][-1]
+    assert "value" not in info_of_interest
+
+    return info_of_interest["label"]
+
+
+def extract_info_box(
+    data_game: dict,
+    labels_to_skip: list = [
+        "Venue",
+    ],
+) -> OrderedDict[str:list]:
+    """
+    extract the bottom-line box score info
+
+    info is stored as a list of info types, with a possibly-singleton list
+    """
+
+    assert "liveData" in data_game
+    assert "boxscore" in data_game["liveData"]
+    assert "info" in data_game["liveData"]["boxscore"]
+
+    lines = OrderedDict()
+    info_field_list = copy.deepcopy(
+        data_game["liveData"]["boxscore"]["info"][:-1]
+    )  # scrape off date, copy for mods
+    for info_field in info_field_list:
+        assert info_field["label"] in _MLBAM_GAME_LABELS, (
+            "%s must be in game labels" % info_field["label"]
+        )
+        if info_field["label"] in labels_to_skip:
+            continue  # skip stuff that should be skipped
+        if info_field["value"].endswith("."):
+            info_field["value"] = info_field["value"][:-1]  # trim trailing period
+        info_field["value"] = [x.strip() for x in info_field["value"].split(";")]
+        # print("%s:" % info_field["label"])
+        # [print("\t%s" % x) for x in info_field["value"]]
+        lines[info_field["label"]] = info_field["value"]
+
+    return lines
+
+
+def extract_info_team(
+    data_game: dict,
+    home_team: bool,
+    labels_to_skip: list = [],
+) -> dict[OrderedDict[str:list]]:
+    """
+    extract the bottom-lines team box score info
+    """
+
+    team_key = "home" if home_team else "away"
+
+    assert "liveData" in data_game
+    assert "boxscore" in data_game["liveData"]
+    assert "teams" in data_game["liveData"]["boxscore"]
+    assert team_key in data_game["liveData"]["boxscore"]["teams"]
+
+    team_data = copy.deepcopy(data_game["liveData"]["boxscore"]["teams"][team_key])
+    assert "info" in team_data
+
+    lines = {}
+
+    for title_sec in team_data["info"]:
+        info_title = title_sec["title"]
+        dict_entry = OrderedDict()
+        assert info_title in _MLBAM_TEAM_TYPES
+        for info_field in title_sec["fieldList"]:
+            if info_field in labels_to_skip:
+                continue  # skip stuff that should be skipped
+            if info_field["value"].endswith("."):
+                info_field["value"] = info_field["value"][:-1]  # trim trailing period
+            info_field["value"] = [x.strip() for x in info_field["value"].split(";")]
+            # print(info_field["label"])
+            # [print("\t%s" % x) for x in info_field["value"]]
+            dict_entry[info_field["label"]] = info_field["value"]
+        lines[info_title] = dict_entry
+
+    return lines
+
+
+def format_info_box(
+    info_box: OrderedDict[str:list], indent_size=2, init_indent=1
+) -> list[str]:
+    """
+    get lines to print box info
+
+    take the box score info, and make lines to display nicely without overrunning,
+    given some indentation specifications
+    """
+
+    lines = []
+
+    for key, values in info_box.items():
+        working_str = " " * indent_size * init_indent + key + ": "
+        for idx_value, value in enumerate(values):
+            if (
+                len(working_str)
+                + len(value)
+                + (2 if (idx_value + 1 != len(values)) else 0)
+                > _CLI_LINE_LENGTH_DEFAULT
+            ):
+                print(working_str)
+                working_str = (
+                    " " * indent_size * (init_indent + 2)
+                    + value
+                    + ("; " if (idx_value + 1 != len(values)) else "")
+                )
+            else:
+                working_str += value + ("; " if (idx_value + 1 != len(values)) else "")
+        lines.append(working_str)
+
+    return lines
+
+
+def format_info_team(
+    info_team: dict[OrderedDict[str:list]],
+    indent_size=2,
+    init_indent=2,
+):
+    """
+    get lines to print team info
+
+    take the team score info, make lines to display nicely without overrunning,
+    given some indentation specifications
+    """
+
+    lines = []
+
+    for team_type in _MLBAM_TEAM_TYPES:
+        if team_type in info_team:
+            lines.append(" " * indent_size * init_indent + team_type)
+
+            for key, values in info_team[team_type].items():
+                working_str = " " * indent_size * init_indent + key + ": "
+                for idx_value, value in enumerate(values):
+                    if (
+                        len(working_str)
+                        + len(value)
+                        + (2 if (idx_value + 1 != len(values)) else 0)
+                        > _CLI_LINE_LENGTH_DEFAULT
+                    ):
+                        print(working_str)
+                        working_str = (
+                            " " * indent_size * (init_indent + 2)
+                            + value
+                            + ("; " if (idx_value + 1 != len(values)) else "")
+                        )
+                    else:
+                        working_str += value + (
+                            "; " if (idx_value + 1 != len(values)) else ""
+                        )
+                lines.append(working_str)
+
+    return lines
 
 
 def main():
@@ -725,7 +959,7 @@ def main():
     ### do functionality
 
     if args.line:
-        game_data = download_game_data(args.game, debug=True)
+        game_data = download_game_data(args.game, debug=args.debug)
         dense_lines, _ = format_linescore(
             extract_linescore_innings(game_data),
             extract_teams_data(game_data),
@@ -745,34 +979,66 @@ def main():
         game_data = download_game_data(args.game, debug=True)
         print()
         pp.pprint(game_data, compact=True, indent=1, depth=2)
-        print()
-        pp.pprint(extract_linescore_data(game_data), compact=True, indent=1, depth=2)
         # print()
-        # pp.pprint(strip_boxscore_data(game_data), compact=True, indent=1, depth=2)
+        # pp.pprint(extract_linescore_data(game_data), compact=True, indent=1, depth=2)
+        # print()
+        # print(extract_teams_data(game_data)["away"])
+        # print(extract_teams_data(game_data)["home"])
+        # print()
+        # print(extract_linescore_innings(game_data))
+        # print()
+        # print([x.get_appetite() for x in extract_linescore_innings(game_data)])
+        # print()
+        # lines_dense, lines_sparse = format_linescore(
+        #     extract_linescore_innings(game_data),
+        #     extract_teams_data(game_data),
+        #     venue=extract_venue_name(game_data),
+        #     decision_dict=extract_decisions(game_data),
+        # )
+        # print("dense linescore:\n")
+        # [print(x) for x in lines_dense]
+        # print()
+        # print("sparse linescore:\n")
+        # [print(x) for x in lines_sparse]
+        # print()
+        # print(translate_gamepk2url(args.game))
+        # print()
+        # print(extract_decisions(game_data))
+        # print()
         print()
-        print(extract_teams_data(game_data)["away"])
-        print(extract_teams_data(game_data)["home"])
-        print()
-        print(extract_linescore_innings(game_data))
-        print()
-        print([x.get_appetite() for x in extract_linescore_innings(game_data)])
+        pp.pprint(extract_boxscore_data(game_data), compact=True, indent=1, depth=2)
+        print("\n")
+        print(extract_gamedate(game_data))
+        print(extract_venue_name(game_data))
         print()
         lines_dense, lines_sparse = format_linescore(
             extract_linescore_innings(game_data),
             extract_teams_data(game_data),
-            venue=extract_venue_name(game_data),
-            decision_dict=extract_decisions(game_data),
+            use_top_spacing_line=False,
+            use_bottom_spacing_line=False,
+            horz_char=" ",
+            vert_char=" ",
+            cross_char=" ",
         )
-        print("dense linescore:\n")
-        [print(x) for x in lines_dense]
+        do_dense = True
+        if do_dense:
+            [print(line) for line in lines_dense]
+        else:
+            [print(line) for line in lines_sparse]
         print()
-        print("sparse linescore:\n")
-        [print(x) for x in lines_sparse]
+        print("  ", extract_teams_data(game_data)["away"], sep="")
         print()
-        print(translate_gamepk2url(args.game))
+        away_info = extract_info_team(game_data, home_team=False)
+        [print(line) for line in format_info_team(away_info)]
+        print("\n")
+        print("  ", extract_teams_data(game_data)["home"], sep="")
         print()
-        print(extract_decisions(game_data))
+        home_info = extract_info_team(game_data, home_team=True)
+        [print(line) for line in format_info_team(home_info)]
         print()
+        box_info = extract_info_box(game_data)
+        [print(line) for line in format_info_box(box_info)]
+        print("\n")
 
 
 if __name__ == "__main__":
