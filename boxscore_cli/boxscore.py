@@ -6,6 +6,7 @@ import argparse
 import json
 import copy
 from collections import OrderedDict
+import re
 
 import urllib.request
 import pprint as pp
@@ -818,7 +819,8 @@ def extract_info_box(
             continue  # skip stuff that should be skipped
         if info_field["value"].endswith("."):
             info_field["value"] = info_field["value"][:-1]  # trim trailing period
-        info_field["value"] = [x.strip() for x in info_field["value"].split(";")]
+        print([x.strip() for x in re.split(';|\.', info_field["value"])])
+        info_field["value"] = [x.strip() for x in re.split(';|\.', info_field["value"]) if not x.isspace()]
         # print("%s:" % info_field["label"])
         # [print("\t%s" % x) for x in info_field["value"]]
         lines[info_field["label"]] = info_field["value"]
