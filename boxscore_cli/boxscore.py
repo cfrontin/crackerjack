@@ -886,7 +886,7 @@ def format_info_box(
                 + (2 if (idx_value + 1 != len(values)) else 0)
                 > _CLI_LINE_LENGTH_DEFAULT
             ):
-                print(working_str)
+                lines.append(working_str)
                 working_str = (
                     " " * indent_size * (init_indent + 2)
                     + value
@@ -917,8 +917,10 @@ def format_info_team(
         if team_type in info_team:
             lines.append(" " * indent_size * init_indent + team_type)
 
+            next_indent = init_indent + 1
+
             for key, values in info_team[team_type].items():
-                working_str = " " * indent_size * init_indent + key + ": "
+                working_str = " " * indent_size * next_indent + key + ": "
                 for idx_value, value in enumerate(values):
                     if (
                         len(working_str)
@@ -926,9 +928,9 @@ def format_info_team(
                         + (2 if (idx_value + 1 != len(values)) else 0)
                         > _CLI_LINE_LENGTH_DEFAULT
                     ):
-                        print(working_str)
+                        lines.append(working_str)
                         working_str = (
-                            " " * indent_size * (init_indent + 2)
+                            " " * indent_size * (next_indent + 2)
                             + value
                             + ("; " if (idx_value + 1 != len(values)) else "")
                         )
