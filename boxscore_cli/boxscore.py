@@ -268,6 +268,155 @@ class LineScoreInning(object):
         return max([len(str(var)) for var in vars if var is not None])
 
 
+class BoxScoreBatter(object):
+    """
+    store one line with player results from a linescore
+    """
+
+    _lastname_player: str
+    _firstname_player: str
+    _pos: str
+    _jersey_player: int
+    _batting_order: str
+    _ab: int
+    _runs: int
+    _hits: int
+    _rbi: int
+    _bb: int
+    _so: int
+    _po: int
+    _asst: int
+
+    def __init__(
+        self,
+        lastname_player,
+        firstname_player,
+        pos,
+        jersey_player,
+        batting_order,
+        ab,
+        runs,
+        hits,
+        rbi,
+        bb,
+        so,
+        po,
+        asst,
+    ):
+        self._lastname_player = lastname_player
+        self._firstname_player = firstname_player
+        self._pos = pos
+        self._jersey_player = jersey_player
+        self._batting_order = str(batting_order) if batting_order is not None else None
+        self._ab = ab
+        self._runs = runs
+        self._hits = hits
+        self._rbi = rbi
+        self._bb = bb
+        self._so = so
+        self._po = po
+        self._asst = asst
+
+    def __str__(self):
+        return "%s, %s. a.k.a. %s (#%s, %s): %s for %s with %s rbi" % (
+            self.lastname_player,
+            self.firstinitial_player,
+            self.firstname_player,
+            self.jersey_player,
+            self.pos,
+            self.hits,
+            self.ab,
+            self.rbi,
+        )
+
+    @staticmethod
+    def get_header_stats():
+        """get the headers for each stat"""
+        header_list = ["AB", "R", "H", "RBI", "BB", "SO", "PO", "A"]
+        return header_list
+
+    def get_appetite_stats(self, incl_header=True):
+        """get the appetite for spaces of each stat"""
+        stat_list = [
+            self.ab,
+            self.runs,
+            self.hits,
+            self.rbi,
+            self.bb,
+            self.so,
+            self.po,
+            self.asst,
+        ]
+        len_list = [len(str(x)) if x is not None else 0 for x in stat_list]
+        if not incl_header:
+            return len_list
+        else:
+            return [
+                max([xx, len(yy)])
+                for xx, yy in list(zip(len_list, self.get_header_stats()))
+            ]
+
+    @property
+    def lastname_player(self):
+        return self._lastname_player
+
+    @property
+    def firstname_player(self):
+        return self._firstname_player
+
+    @property
+    def pos(self):
+        return self._pos
+
+    @property
+    def jersey_player(self):
+        return self._jersey_player
+
+    @property
+    def batting_order(self):
+        return self._batting_order
+
+    @property
+    def ab(self):
+        return self._ab
+
+    @property
+    def runs(self):
+        return self._runs
+
+    @property
+    def hits(self):
+        return self._hits
+
+    @property
+    def rbi(self):
+        return self._rbi
+
+    @property
+    def bb(self):
+        return self._bb
+
+    @property
+    def so(self):
+        return self._so
+
+    @property
+    def po(self):
+        return self._po
+
+    @property
+    def asst(self):
+        return self._asst
+
+    @property
+    def firstinitial_player(self):
+        return self._firstname_player[0]
+
+
+def get_prefixed_player_id(player_id: int):
+    return "ID%d" % player_id
+
+
 def print_dummy_linescore():
     """
     print a dummy linescore for demo purposes
@@ -819,8 +968,9 @@ def extract_info_box(
             continue  # skip stuff that should be skipped
         if info_field["value"].endswith("."):
             info_field["value"] = info_field["value"][:-1]  # trim trailing period
-        print([x.strip() for x in re.split(';|\.', info_field["value"])])
-        info_field["value"] = [x.strip() for x in re.split(';|\.', info_field["value"]) if not x.isspace()]
+        info_field["value"] = [
+            x.strip() for x in re.split(";|\.", info_field["value"]) if not x.isspace()
+        ]
         # print("%s:" % info_field["label"])
         # [print("\t%s" % x) for x in info_field["value"]]
         lines[info_field["label"]] = info_field["value"]
@@ -865,6 +1015,158 @@ def extract_info_team(
         lines[info_title] = dict_entry
 
     return lines
+
+
+def extract_player_detailed(data_game: dict, player_id: int) -> dict:
+    """
+    extract full bio data for a given mlbid
+    """
+
+    player_id_prefix = get_prefixed_player_id(player_id)
+
+    assert "gameData" in data_game
+    assert "players" in data_game["gameData"]
+    assert player_id_prefix in data_game["gameData"]["players"]
+
+    return data_game["gameData"]["players"][player_id_prefix]
+
+
+def extract_boxscore_batter(data_game: dict) -> dict[str : list[BoxScoreBatter]]:
+    """
+    extract each batters's line from the game data, return a list for each team
+    """
+
+    data_box = extract_boxscore_data(data_game)
+
+    lines_dict = {"away": [], "home": []}
+
+    for tm_key in ("away", "home"):
+        for player_key in data_box["teams"][tm_key]["batters"]:
+            player_key_mod = get_prefixed_player_id(player_key)
+            assert player_key_mod in data_box["teams"][tm_key]["players"]
+
+            player_data = extract_player_detailed(data_game, player_key)
+            player_game_data = data_box["teams"][tm_key]["players"][player_key_mod]
+            player_batting_data = player_game_data["stats"]["batting"]
+            player_fielding_data = player_game_data["stats"]["fielding"]
+
+            player_bsb = BoxScoreBatter(
+                player_data.get("useLastName"),
+                player_data.get("useName"),
+                player_game_data["position"].get("abbreviation"),
+                player_game_data.get("jerseyNumber"),
+                player_game_data.get("battingOrder"),
+                player_batting_data.get("atBats"),
+                player_batting_data.get("runs"),
+                player_batting_data.get("hits"),
+                player_batting_data.get("rbi"),
+                player_batting_data.get("baseOnBalls"),
+                player_batting_data.get("strikeOuts"),
+                player_fielding_data.get("putOuts"),
+                player_fielding_data.get("assists"),
+            )
+
+            lines_dict[tm_key].append(player_bsb)
+
+    return lines_dict
+
+
+def format_batters(
+    batter_list: dict[str : list[BoxScoreBatter]],
+    indent_size=2,
+    init_indent=2,
+    vert_char="|",
+    cross_char="+",
+) -> dict[str : dict[str:str]]:
+    """
+    format one or both teams' batters
+    """
+
+    stats_appetite = [-1 for x in batter_list["away"][0].get_appetite_stats()]
+    for tmkey in ("away", "home"):
+        for bsr in batter_list[tmkey]:
+            for idx_stat in range(len(stats_appetite)):
+                stats_appetite[idx_stat] = max(
+                    [stats_appetite[idx_stat], bsr.get_appetite_stats()[idx_stat]]
+                )
+    stats_appetite_total = sum(stats_appetite) + (len(stats_appetite) - 1) * len(
+        " %s " % vert_char
+    )
+
+    lineups_to_stats = {
+        "away": {x: [] for x in range(1, 9 + 1)},
+        "home": {x: [] for x in range(1, 9 + 1)},
+    }
+    lineups_to_bsb = {
+        "away": {x: [] for x in range(1, 9 + 1)},
+        "home": {x: [] for x in range(1, 9 + 1)},
+    }
+    lines_out = {
+        "away": [],
+        "home": [],
+    }
+
+    line_output_fmt = ""
+    for x in ["%" + str(x) + "s " + vert_char + " " for x in stats_appetite]:
+        line_output_fmt += x
+    line_output_fmt = line_output_fmt[:-3]
+    for tmkey in ("away", "home"):
+        for bsb in batter_list[tmkey]:
+            line_output = line_output_fmt % (
+                bsb.ab,
+                bsb.runs,
+                bsb.hits,
+                bsb.rbi,
+                bsb.bb,
+                bsb.so,
+                bsb.po,
+                bsb.asst,
+            )
+            if bsb.batting_order is None:
+                continue  # TODO: debug this case (718360)
+            lineup_pos = int(bsb.batting_order[0])
+            lineup_count = int(str(bsb.batting_order[1:]))
+            assert lineup_pos in lineups_to_stats[tmkey]
+            if lineup_count > 0:
+                assert len(lineups_to_stats[tmkey][lineup_pos]) == lineup_count
+            lineups_to_stats[tmkey][lineup_pos].append(line_output)
+            lineups_to_bsb[tmkey][lineup_pos].append(bsb)
+
+    resid_char = (
+        _CLI_LINE_LENGTH_DEFAULT - indent_size * init_indent - stats_appetite_total - 8
+    )
+
+    for tmkey in ("away", "home"):
+        header_line = (
+            " " * indent_size * init_indent
+            + " " * resid_char
+            + "       "
+            + "".join(
+                [(x + " %s " % vert_char) for x in BoxScoreBatter.get_header_stats()]
+            )[:-3]
+        )
+        lines_out[tmkey].append(header_line)
+        for poskey in lineups_to_stats[tmkey]:
+            for subno, statline in enumerate(lineups_to_stats[tmkey][poskey]):
+                prefix_line = " %1d: " % poskey if subno == 0 else "      "
+                bsb = lineups_to_bsb[tmkey][poskey][subno]
+                name_sector = "%s%s, %s (#%s), %2s" % (
+                    prefix_line,
+                    bsb.lastname_player,
+                    bsb.firstname_player,
+                    bsb.jersey_player,
+                    bsb.pos,
+                )
+                name_sector_fmt = "%-" + str(resid_char) + "s"
+                line = (
+                    " " * indent_size * init_indent
+                    + (name_sector_fmt % name_sector)
+                    + " %s     " % vert_char
+                    + statline
+                )
+                lines_out[tmkey].append(line)
+
+    return lines_out
 
 
 def format_info_box(
@@ -977,9 +1279,16 @@ def main():
         # print_dummy_linescore()
 
     if args.box:
-        print_dummy_boxscore()
+        print()
+        game_data = download_game_data(args.game, debug=args.debug)
+        batter_list = extract_boxscore_batter(game_data)
+        line_dict = format_batters(batter_list)
+        for tmkey in ('away', 'home'):
+            print("%s:" % tmkey)
+            [print(x) for x in line_dict[tmkey]]
+            print()
 
-    if args.game and (not args.line):  # exploration mode
+    if args.game and (not args.line) and (not args.box):  # exploration mode
         game_data = download_game_data(args.game, debug=True)
         print()
         pp.pprint(game_data, compact=True, indent=1, depth=2)
