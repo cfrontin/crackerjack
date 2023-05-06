@@ -1279,14 +1279,39 @@ def main():
         # print_dummy_linescore()
 
     if args.box:
-        print()
         game_data = download_game_data(args.game, debug=args.debug)
+        print("\n")
+        print(extract_gamedate(game_data))
+        print(extract_venue_name(game_data))
+        print()
+        lines_dense, lines_sparse = format_linescore(
+            extract_linescore_innings(game_data),
+            extract_teams_data(game_data),
+            use_top_spacing_line=False,
+            use_bottom_spacing_line=False,
+            horz_char=" ",
+            vert_char=" ",
+            cross_char=" ",
+        )
+        do_dense = True
+        if do_dense:
+            [print(line) for line in lines_dense]
+        else:
+            [print(line) for line in lines_sparse]
+        print()
         batter_list = extract_boxscore_batter(game_data)
         line_dict = format_batters(batter_list)
         for tmkey in ('away', 'home'):
-            print("%s:" % tmkey)
+            print("  ", extract_teams_data(game_data)[tmkey], sep="")
+            print()
             [print(x) for x in line_dict[tmkey]]
             print()
+            info_line_tmkey = extract_info_team(game_data, home_team=(tmkey == 'home'))
+            [print(x) for x in format_info_team(info_line_tmkey)]
+            print()
+        info_line_box = extract_info_box(game_data)
+        [print(x) for x in format_info_box(info_line_box)]
+        print()            
 
     if args.game and (not args.line) and (not args.box):  # exploration mode
         game_data = download_game_data(args.game, debug=True)
