@@ -1301,17 +1301,17 @@ def main():
         print()
         batter_list = extract_boxscore_batter(game_data)
         line_dict = format_batters(batter_list)
-        for tmkey in ('away', 'home'):
+        for tmkey in ("away", "home"):
             print("  ", extract_teams_data(game_data)[tmkey], sep="")
             print()
             [print(x) for x in line_dict[tmkey]]
             print()
-            info_line_tmkey = extract_info_team(game_data, home_team=(tmkey == 'home'))
+            info_line_tmkey = extract_info_team(game_data, home_team=(tmkey == "home"))
             [print(x) for x in format_info_team(info_line_tmkey)]
             print()
         info_line_box = extract_info_box(game_data)
         [print(x) for x in format_info_box(info_line_box)]
-        print()            
+        print()
 
     if args.game and (not args.line) and (not args.box):  # exploration mode
         game_data = download_game_data(args.game, debug=True)
