@@ -1383,7 +1383,7 @@ def format_batters(
             for subno, statline in enumerate(lineups_to_stats[tmkey][poskey]):
                 prefix_line = " %1d: " % poskey if subno == 0 else "      "
                 bsb = lineups_to_bsb[tmkey][poskey][subno]
-                name_sector = "%s%s, %s (#%s), %2s" % (
+                name_sector = "%s%s, %s (#%s), %s" % (
                     prefix_line,
                     bsb.lastname_player,
                     bsb.firstname_player,
