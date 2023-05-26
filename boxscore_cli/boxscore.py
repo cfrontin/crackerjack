@@ -37,6 +37,7 @@ _MLBAM_GAME_LABELS = [
     "T",
     "Att",
     "Venue",
+    "Ejections",
 ]
 _MLBAM_TEAM_TYPES = [
     "BATTING",
