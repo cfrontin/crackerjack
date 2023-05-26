@@ -268,6 +268,113 @@ class LineScoreInning(object):
         return max([len(str(var)) for var in vars if var is not None])
 
 
+class BoxScorePitcher(object):
+    """
+    store one line with pitcher results from a linescore
+    """
+
+    _lastname_player: str
+    _firstname_player: str
+    _jersey_player: int
+    _innings_pitched: str
+    _hits: int
+    _runs: int
+    _runs_earned: int
+    _bb: int
+    _strikeouts: int
+    _hr: int
+
+    def __init__(
+        self,
+        lastname_player,
+        firstname_player,
+        jersey_player,
+        innings_pitched,
+        hits,
+        runs,
+        runs_earned,
+        bb,
+        strikeouts,
+        hr,
+    ):
+        self._lastname_player = lastname_player
+        self._firstname_player = firstname_player
+        self._jersey_player = jersey_player
+        self._innings_pitched = innings_pitched
+        self._hits = hits
+        self._runs = runs
+        self._runs_earned = runs_earned
+        self._bb = bb
+        self._strikeouts = strikeouts
+        self._hr = hr
+
+    @staticmethod
+    def get_header_stats():
+        """get the headers for each stat"""
+        header_list = ["IP", "H", "R", "ER", "BB", "K", "HR"]
+        return header_list
+
+    def get_appetite_stats(self, incl_header=True):
+        """get the appetite for spaces of each stat"""
+        stat_list = [
+            self.innings_pitched,
+            self.hits,
+            self.runs,
+            self.runs_earned,
+            self.bb,
+            self.strikeouts,
+            self.hr,
+        ]
+        len_list = [len(str(x)) if x is not None else 0 for x in stat_list]
+        if not incl_header:
+            return len_list
+        else:
+            return [
+                max([xx, len(yy)])
+                for xx, yy in list(zip(len_list, self.get_header_stats()))
+            ]
+
+    @property
+    def lastname_player(self):
+        return self._lastname_player
+
+    @property
+    def firstname_player(self):
+        return self._firstname_player
+
+    @property
+    def jersey_player(self):
+        return self._jersey_player
+
+    @property
+    def innings_pitched(self):
+        return self._innings_pitched
+
+    @property
+    def hits(self):
+        return self._hits
+
+    @property
+    def runs(self):
+        return self._runs
+
+    @property
+    def runs_earned(self):
+        return self._runs_earned
+
+    @property
+    def bb(self):
+        return self._bb
+
+    @property
+    def strikeouts(self):
+        return self._strikeouts
+
+    @property
+    def hr(self):
+        return self._hr
+
+
 class BoxScoreBatter(object):
     """
     store one line with player results from a linescore
@@ -486,7 +593,7 @@ def download_game_data(gamepk: int, debug=False):
     url_str_game = translate_gamepk2url(gamepk)  # get the correct mlbapi url
     debug_filename = os.path.join(_PKG_DIR, "%d.json" % gamepk)
     data_game = download_json_url(
-        url_str_game, debug_file_loader=None if not debug else debug_filename
+        url_str_game, debug_file_loader=(None if not debug else debug_filename)
     )  # get the json from the link
 
     return data_game  # return the game data
@@ -1031,6 +1138,42 @@ def extract_player_detailed(data_game: dict, player_id: int) -> dict:
     return data_game["gameData"]["players"][player_id_prefix]
 
 
+def extract_boxscore_pitcher(data_game: dict) -> dict[str : list[BoxScorePitcher]]:
+    """
+    extract each pitcher's line from the game data, return a list for each team
+    """
+
+    data_box = extract_boxscore_data(data_game)
+
+    lines_dict = {"away": [], "home": []}
+
+    for tm_key in ("away", "home"):
+        for player_key in data_box["teams"][tm_key]["pitchers"]:
+            player_key_mod = get_prefixed_player_id(player_key)
+            assert player_key_mod in data_box["teams"][tm_key]["players"]
+
+            player_data = extract_player_detailed(data_game, player_key)
+            player_game_data = data_box["teams"][tm_key]["players"][player_key_mod]
+            player_pitching_data = player_game_data["stats"]["pitching"]
+
+            player_bsp = BoxScorePitcher(
+                player_data.get("useLastName"),
+                player_data.get("useName"),
+                player_game_data.get("jerseyNumber"),
+                player_pitching_data.get("inningsPitched"),
+                player_pitching_data.get("hits"),
+                player_pitching_data.get("runs"),
+                player_pitching_data.get("earnedRuns"),
+                player_pitching_data.get("baseOnBalls"),
+                player_pitching_data.get("strikeOuts"),
+                player_pitching_data.get("homeRuns"),
+            )
+
+            lines_dict[tm_key].append(player_bsp)
+
+    return lines_dict
+
+
 def extract_boxscore_batter(data_game: dict) -> dict[str : list[BoxScoreBatter]]:
     """
     extract each batters's line from the game data, return a list for each team
@@ -1069,6 +1212,95 @@ def extract_boxscore_batter(data_game: dict) -> dict[str : list[BoxScoreBatter]]
             lines_dict[tm_key].append(player_bsb)
 
     return lines_dict
+
+
+def format_pitchers(
+    pitcher_list: dict[str : list[BoxScorePitcher]],
+    indent_size=2,
+    init_indent=2,
+    vert_char="|",
+    cross_char="+",
+) -> dict[str : dict[str:str]]:
+    """
+    format one or both teams' pitchers
+    """
+
+    stats_appetite = [-1 for x in pitcher_list["away"][0].get_appetite_stats()]
+    for tmkey in ("away", "home"):
+        for bsr in pitcher_list[tmkey]:
+            for idx_stat in range(len(stats_appetite)):
+                stats_appetite[idx_stat] = max(
+                    [stats_appetite[idx_stat], bsr.get_appetite_stats()[idx_stat]]
+                )
+    stats_appetite_total = sum(stats_appetite) + (len(stats_appetite) - 1) * len(
+        " %s " % vert_char
+    )
+
+    staff_to_stats = {
+        "away": [],
+        "home": [],
+    }
+    staff_to_bsp = {
+        "away": [],
+        "home": [],
+    }
+    lines_out = {
+        "away": [],
+        "home": [],
+    }
+
+    line_output_fmt = ""
+    for x in ["%" + str(x) + "s " + vert_char + " " for x in stats_appetite]:
+        line_output_fmt += x
+    line_output_fmt = line_output_fmt[:-3]
+    for tmkey in ("away", "home"):
+        for bsp in pitcher_list[tmkey]:
+            line_output = line_output_fmt % (
+                bsp.innings_pitched,
+                bsp.hits,
+                bsp.runs,
+                bsp.runs_earned,
+                bsp.bb,
+                bsp.strikeouts,
+                bsp.hr,
+            )
+            staff_to_stats[tmkey].append(line_output)
+            staff_to_bsp[tmkey].append(bsp)
+
+    resid_char = (
+        _CLI_LINE_LENGTH_DEFAULT - indent_size * init_indent - stats_appetite_total - 8
+    )
+
+    for tmkey in ("away", "home"):
+        header_line = (
+            " " * indent_size * init_indent
+            + " " * resid_char
+            + "        "
+            + "".join(
+                [(x + " %s " % vert_char) for x in BoxScorePitcher.get_header_stats()]
+            )[:-3]
+        )
+        lines_out[tmkey].append(header_line)
+        for pitcher_index in range(len(staff_to_stats[tmkey])):
+            statline = staff_to_stats[tmkey][pitcher_index]
+            prefix_line = " %1d: " % pitcher_index
+            bsp = staff_to_bsp[tmkey][pitcher_index]
+            name_sector = "%s%s, %s (#%s)" % (
+                prefix_line,
+                bsp.lastname_player,
+                bsp.firstname_player,
+                bsp.jersey_player,
+            )
+            name_sector_fmt = "%-" + str(resid_char) + "s"
+            line = (
+                " " * indent_size * init_indent
+                + (name_sector_fmt % name_sector)
+                + " %s     " % vert_char
+                + statline
+            )
+            lines_out[tmkey].append(line)
+
+    return lines_out
 
 
 def format_batters(
@@ -1300,11 +1532,15 @@ def main():
             [print(line) for line in lines_sparse]
         print()
         batter_list = extract_boxscore_batter(game_data)
-        line_dict = format_batters(batter_list)
+        pitcher_list = extract_boxscore_pitcher(game_data)
+        line_batters_dict = format_batters(batter_list)
+        line_pitchers_dict = format_pitchers(pitcher_list)
         for tmkey in ("away", "home"):
             print("  ", extract_teams_data(game_data)[tmkey], sep="")
             print()
-            [print(x) for x in line_dict[tmkey]]
+            [print(x) for x in line_batters_dict[tmkey]]
+            print()
+            [print(x) for x in line_pitchers_dict[tmkey]]
             print()
             info_line_tmkey = extract_info_team(game_data, home_team=(tmkey == "home"))
             [print(x) for x in format_info_team(info_line_tmkey)]
@@ -1314,7 +1550,7 @@ def main():
         print()
 
     if args.game and (not args.line) and (not args.box):  # exploration mode
-        game_data = download_game_data(args.game, debug=True)
+        game_data = download_game_data(args.game, debug=args.debug)
         print()
         pp.pprint(game_data, compact=True, indent=1, depth=2)
         # print()
