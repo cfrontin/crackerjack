@@ -78,12 +78,14 @@ class Team(object):
 
     _location_name: str
     _team_name: str
+    _short_name: str
     _abbrev: str
     _is_home: bool
 
-    def __init__(self, location_name_, team_name_, abbrev_, is_home_):
+    def __init__(self, location_name_, team_name_, short_name_, abbrev_, is_home_):
         self._location_name = location_name_
         self._team_name = team_name_
+        self._short_name= short_name_
         self._abbrev = abbrev_
         self._is_home = is_home_
 
@@ -104,6 +106,15 @@ class Team(object):
         e.g. _Orioles_ in Baltimore _Orioles_
         """
         return self._team_name
+
+    @property
+    def short_name(self):
+        """
+        the short name on a team, as a string
+
+        e.g. ???
+        """
+        return self._short_name
 
     @property
     def abbrev(self):
@@ -676,10 +687,11 @@ def extract_teams_data(data_game: dict) -> dict[str:Team]:
         assert key in data_teams
         data_team = data_teams[key]
         teamName = data_team["teamName"]
-        locationName = data_team["locationName"]
+        locationName = data_team["franchiseName"] # not! data_team["locationName"]
+        shortName = data_team["shortName"]
         abbreviation = data_team["abbreviation"]
 
-        teams[key] = Team(locationName, teamName, abbreviation, key == "home")
+        teams[key] = Team(locationName, teamName, shortName, abbreviation, key == "home")
 
     return teams
 
@@ -908,6 +920,7 @@ def format_linescore(
 
     spaces_team_fullname = max([len(team.full_name) for team in teams.values()])
     spaces_team_cityname = max([len(team.location_name) for team in teams.values()])
+    spaces_team_shortname = max([len(team.short_name) for team in teams.values()])
 
     def dtf(x_in):
         if force_uppercase_team:
@@ -921,6 +934,14 @@ def format_linescore(
         substitution_set_name_top_dense.append(horz_char * residual_spaces_dense)
         substitution_set_name_away_dense.append(dtf(teams["away"].full_name))
         substitution_set_name_home_dense.append(dtf(teams["home"].full_name))
+        substitution_set_name_bot_dense.append(horz_char * residual_spaces_dense)
+    elif residual_spaces_dense > spaces_team_shortname:
+        format_name_dense += (
+            "%-" + str(residual_spaces_dense) + "s"
+        )  # fill remaining spaces
+        substitution_set_name_top_dense.append(horz_char * residual_spaces_dense)
+        substitution_set_name_away_dense.append(dtf(teams["away"].short_name))
+        substitution_set_name_home_dense.append(dtf(teams["home"].short_name))
         substitution_set_name_bot_dense.append(horz_char * residual_spaces_dense)
     elif residual_spaces_dense > spaces_team_cityname:
         format_name_dense += (
