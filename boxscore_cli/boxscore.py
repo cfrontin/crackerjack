@@ -17,10 +17,6 @@ from tools_boxscore import *
 from tools_boxscore import *
 
 # some private global variables
-_APP_DIR = os.path.split(__file__)[0]  # where this file is installed
-_PKG_DIR = os.path.join(_APP_DIR, os.pardir)  # where this package is installed
-_MLB_GAME_FORMAT_STRING = "https://statsapi.mlb.com/api/v1.1/game/%s/feed/live?hydrate=officials"  # 6 digit numeric gamepk as string
-_MLB_SCHEDULE_FORMAT_STRING = "https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=%s&endDate=%s"  # dates as string: '2023-01-01'
 _CLI_LINE_LENGTH_DEFAULT = 80
 
 # labels known to the mlbapi
