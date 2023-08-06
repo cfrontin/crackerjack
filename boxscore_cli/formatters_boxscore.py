@@ -61,14 +61,14 @@ def format_pitchers(
             staff_to_bsp[tmkey].append(bsp)
 
     resid_char = (
-        _CLI_LINE_LENGTH_DEFAULT - indent_size * init_indent - stats_appetite_total - 8
+        _CLI_LINE_LENGTH_DEFAULT - indent_size * init_indent - stats_appetite_total - 4
     )
 
     for tmkey in ("away", "home"):
         header_line = (
             " " * indent_size * init_indent
             + " " * resid_char
-            + "        "
+            + " %s  " % vert_char
             + "".join(
                 [(x + " %s " % vert_char) for x in BoxScorePitcher.get_header_stats()]
             )[:-3]
@@ -88,7 +88,7 @@ def format_pitchers(
             line = (
                 " " * indent_size * init_indent
                 + (name_sector_fmt % name_sector)
-                + " %s     " % vert_char
+                + " %s " % vert_char
                 + statline
             )
             lines_out[tmkey].append(line)
@@ -165,7 +165,7 @@ def format_batters(
         header_line = (
             " " * indent_size * init_indent
             + " " * resid_char
-            + "   "
+            + " %s " % vert_char
             + "".join(
                 [(x + " %s " % vert_char) for x in BoxScoreBatter.get_header_stats()]
             )[:-3]
