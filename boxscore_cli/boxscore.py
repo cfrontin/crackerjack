@@ -1218,7 +1218,7 @@ def extract_boxscore_batter(data_game: dict) -> dict[str : list[BoxScoreBatter]]
             player_bsb = BoxScoreBatter(
                 player_data.get("useLastName"),
                 player_data.get("useName"),
-                player_game_data["position"].get("abbreviation"),
+                "-".join([posi.get("abbreviation") for posi in player_game_data["allPositions"]]),
                 player_game_data.get("jerseyNumber"),
                 player_game_data.get("battingOrder"),
                 player_batting_data.get("atBats"),
