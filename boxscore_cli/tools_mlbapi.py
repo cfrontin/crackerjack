@@ -11,6 +11,60 @@ _PKG_DIR = os.path.join(_APP_DIR, os.pardir)  # where this package is installed
 _MLB_GAME_FORMAT_STRING = "https://statsapi.mlb.com/api/v1.1/game/%s/feed/live?hydrate=officials"  # 6 digit numeric gamepk as string
 _MLB_SCHEDULE_FORMAT_STRING = "https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=%s&endDate=%s"  # dates as string: '2023-01-01'
 
+# labels known to the mlbapi
+_MLBAM_GAME_LABELS = [
+    "Game Scores",
+    "WP",
+    "Balk",
+    "IBB",
+    "HBP",
+    "Pitches-strikes",
+    "Groundouts-flyouts",
+    "Batters faced",
+    "Inherited runners-scored",
+    "Pitch timer violations",
+    "Umpires",
+    "Weather",
+    "Wind",
+    "First pitch",
+    "T",
+    "Att",
+    "Venue",
+    "Ejections",
+]
+_MLBAM_TEAM_TYPES = [
+    "BATTING",
+    "BASERUNNING",
+    "FIELDING",
+]
+_MLBAM_TEAM_BATTING_LABELS = [
+    "2b",
+    "3b",
+    "HR",
+    "TB",
+    "RB",
+    "2-out RBI",
+    "Runners left in scoring position, 2 out",
+    "SAC",
+    "SF",
+    "GIDP",
+    "Team RISP",
+    "Team LOB||",
+]
+_MLBAM_TEAM_BASERUNNING_LABELS = [
+    "SB",
+    "CS",
+    "PO",
+]
+_MLBAM_TEAM_FIELDING_LABELS = [
+    "E",
+    "DP",
+    "TP",
+    "PB",
+    "Outfield assists",
+    "Pickoffs",
+]
+
 class Team(object):
     """store a team"""
 
@@ -260,3 +314,31 @@ def extract_linescore_innings(data_game: dict):
 
     return lsi_list
 
+
+def extract_gamedate(data_game: dict) -> dict:
+    """
+    give a game data dict and get the date of the game
+    """
+
+    assert "liveData" in data_game
+    assert "boxscore" in data_game["liveData"]
+    assert "info" in data_game["liveData"]["boxscore"]
+
+    info_of_interest = data_game["liveData"]["boxscore"]["info"][-1]
+    assert "value" not in info_of_interest
+
+    return info_of_interest["label"]
+
+
+def extract_player_detailed(data_game: dict, player_id: int) -> dict:
+    """
+    extract full bio data for a given mlbid
+    """
+
+    player_id_prefix = get_prefixed_player_id(player_id)
+
+    assert "gameData" in data_game
+    assert "players" in data_game["gameData"]
+    assert player_id_prefix in data_game["gameData"]["players"]
+
+    return data_game["gameData"]["players"][player_id_prefix]

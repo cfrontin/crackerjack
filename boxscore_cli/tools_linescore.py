@@ -130,3 +130,48 @@ class LineScoreInning(object):
         # return the longest length of the converted string
         return max([len(str(var)) for var in vars if var is not None])
 
+
+def extract_RHE(linescoreinning_list: list[LineScoreInning]):
+    R_away = 0
+    R_home = 0
+    H_away = 0
+    H_home = 0
+    E_away = 0
+    E_home = 0
+    LOB_away = 0
+    LOB_home = 0
+
+    for lsi in linescoreinning_list:
+        R_away += lsi.R_away if lsi.R_away is not None else 0
+        R_home += lsi.R_home if lsi.R_home is not None else 0
+        H_away += lsi.H_away if lsi.H_away is not None else 0
+        H_home += lsi.H_home if lsi.H_home is not None else 0
+        E_away += lsi.E_away if lsi.E_away is not None else 0
+        E_home += lsi.E_home if lsi.E_home is not None else 0
+        LOB_away += lsi.LOB_away if lsi.LOB_away is not None else 0
+        LOB_home += lsi.LOB_home if lsi.LOB_home is not None else 0
+
+    RHE_dict = {}
+    RHE_dict["R"] = {
+        "spaces": max([len(str(x)) for x in [R_away, R_home]]),
+        "away": R_away,
+        "home": R_home,
+    }
+    RHE_dict["H"] = {
+        "spaces": max([len(str(x)) for x in [H_away, H_home]]),
+        "away": H_away,
+        "home": H_home,
+    }
+    RHE_dict["E"] = {
+        "spaces": max([len(str(x)) for x in [E_away, E_home]]),
+        "away": E_away,
+        "home": E_home,
+    }
+    RHE_dict["LOB"] = {
+        "spaces": max([len(str(x)) for x in [LOB_away, LOB_home]]),
+        "away": LOB_away,
+        "home": LOB_home,
+    }
+
+    return RHE_dict
+

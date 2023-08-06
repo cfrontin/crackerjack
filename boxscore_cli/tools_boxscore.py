@@ -1,4 +1,6 @@
 
+import copy
+
 class BoxScorePitcher(object):
     """
     store one line with pitcher results from a linescore
@@ -250,3 +252,16 @@ class BoxScoreBatter(object):
     def firstinitial_player(self):
         return self._firstname_player[0]
 
+
+def extract_boxscore_data(data_game: dict) -> dict:
+    """
+    give a game_pk and get the boxscore data
+    """
+
+    assert "liveData" in data_game
+    data_liveData = data_game["liveData"]
+
+    assert "boxscore" in data_liveData
+    boxscore = copy.deepcopy(data_liveData["boxscore"])
+
+    return boxscore
