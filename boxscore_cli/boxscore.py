@@ -31,6 +31,7 @@ def main():
     parser.add_argument("-l", "--line", action="store_true", default=False)
     parser.add_argument("-b", "--box", action="store_true", default=False)
     parser.add_argument("-g", "--game", action="store", default=None, type=int)
+    parser.add_argument("-w", "--wide", action="store_true", default=False)
     parser.add_argument("--debug", action="store_true", default=False)
 
     args = parser.parse_args()
@@ -44,6 +45,7 @@ def main():
             extract_teams_data(game_data),
             venue=extract_venue_name(game_data),
             decision_dict=extract_decisions(game_data),
+            wide_display=args.wide,
         )
         print()
         [print(line) for line in dense_lines]
@@ -63,6 +65,7 @@ def main():
             horz_char=" ",
             vert_char=" ",
             cross_char=" ",
+            wide_display=args.wide,
         )
         do_dense = True
         if do_dense:
@@ -72,8 +75,8 @@ def main():
         print()
         batter_list = extract_boxscore_batter(game_data)
         pitcher_list = extract_boxscore_pitcher(game_data)
-        line_batters_dict = format_batters(batter_list)
-        line_pitchers_dict = format_pitchers(pitcher_list)
+        line_batters_dict = format_batters(batter_list, wide_display=args.wide)
+        line_pitchers_dict = format_pitchers(pitcher_list, wide_display=args.wide)
         for tmkey in ("away", "home"):
             print("  ", extract_teams_data(game_data)[tmkey], sep="")
             print()
@@ -82,10 +85,10 @@ def main():
             [print(x) for x in line_pitchers_dict[tmkey]]
             print()
             info_line_tmkey = extract_info_team(game_data, home_team=(tmkey == "home"))
-            [print(x) for x in format_info_team(info_line_tmkey)]
+            [print(x) for x in format_info_team(info_line_tmkey, wide_display=args.wide)]
             print()
         info_line_box = extract_info_box(game_data)
-        [print(x) for x in format_info_box(info_line_box)]
+        [print(x) for x in format_info_box(info_line_box, wide_display=args.wide)]
         print()
 
     if args.game and (not args.line) and (not args.box):  # exploration mode

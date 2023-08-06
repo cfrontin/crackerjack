@@ -6,6 +6,7 @@ from tools_boxscore import *
 
 # this should be reconfigured to be part of a settings file
 _CLI_LINE_LENGTH_DEFAULT = 80
+_CLI_LINE_LENGTH_WIDE_DEFAULT = 120
 
 def format_pitchers(
     pitcher_list: dict[str : list[BoxScorePitcher]],
@@ -13,6 +14,7 @@ def format_pitchers(
     init_indent=2,
     vert_char="|",
     cross_char="+",
+    wide_display=False,
 ) -> dict[str : dict[str:str]]:
     """
     format one or both teams' pitchers
@@ -61,7 +63,7 @@ def format_pitchers(
             staff_to_bsp[tmkey].append(bsp)
 
     resid_char = (
-        _CLI_LINE_LENGTH_DEFAULT - indent_size * init_indent - stats_appetite_total - 4
+        (_CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT) - indent_size * init_indent - stats_appetite_total - 4
     )
 
     for tmkey in ("away", "home"):
@@ -102,6 +104,7 @@ def format_batters(
     init_indent=2,
     vert_char="|",
     cross_char="+",
+    wide_display=False,
 ) -> dict[str : dict[str:str]]:
     """
     format one or both teams' batters
@@ -158,7 +161,7 @@ def format_batters(
             lineups_to_bsb[tmkey][lineup_pos].append(bsb)
 
     resid_char = (
-        _CLI_LINE_LENGTH_DEFAULT - indent_size * init_indent - stats_appetite_total - 4
+        (_CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT) - indent_size * init_indent - stats_appetite_total - 4
     )
 
     for tmkey in ("away", "home"):
@@ -195,7 +198,10 @@ def format_batters(
 
 
 def format_info_box(
-    info_box: OrderedDict[str:list], indent_size=2, init_indent=1
+    info_box: OrderedDict[str:list],
+    indent_size=2,
+    init_indent=1,
+    wide_display=False,
 ) -> list[str]:
     """
     get lines to print box info
@@ -213,7 +219,7 @@ def format_info_box(
                 len(working_str)
                 + len(value)
                 + (2 if (idx_value + 1 != len(values)) else 0)
-                > _CLI_LINE_LENGTH_DEFAULT
+                > (_CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT)
             ):
                 lines.append(working_str)
                 working_str = (
@@ -232,6 +238,7 @@ def format_info_team(
     info_team: dict[OrderedDict[str:list]],
     indent_size=2,
     init_indent=2,
+    wide_display=False,
 ):
     """
     get lines to print team info
@@ -255,7 +262,7 @@ def format_info_team(
                         len(working_str)
                         + len(value)
                         + (2 if (idx_value + 1 != len(values)) else 0)
-                        > _CLI_LINE_LENGTH_DEFAULT
+                        > (_CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT)
                     ):
                         lines.append(working_str)
                         working_str = (
