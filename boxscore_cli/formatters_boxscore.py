@@ -76,7 +76,7 @@ def format_pitchers(
         lines_out[tmkey].append(header_line)
         for pitcher_index in range(len(staff_to_stats[tmkey])):
             statline = staff_to_stats[tmkey][pitcher_index]
-            prefix_line = " %1d: " % pitcher_index
+            prefix_line = " %1d: " % (pitcher_index+1)
             bsp = staff_to_bsp[tmkey][pitcher_index]
             name_sector = "%s%s, %s (#%s)" % (
                 prefix_line,
