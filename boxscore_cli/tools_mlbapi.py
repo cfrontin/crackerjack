@@ -2,7 +2,7 @@
 import copy
 import json
 import os
-import urllib
+import urllib.request
 
 from tools_linescore import LineScoreInning
 

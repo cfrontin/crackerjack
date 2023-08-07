@@ -7,10 +7,8 @@ import json
 import copy
 import re
 
-import urllib.request
 import pprint as pp
 
-import tools_mlbapi
 from tools_mlbapi import *
 from tools_linescore import *
 from tools_boxscore import *
