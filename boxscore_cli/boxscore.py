@@ -17,6 +17,19 @@ from extractors_boxscore import *
 from formatters_linescore import *
 from formatters_boxscore import *
 
+def print_linescore(gamePk, debug=False, wide=False):
+        game_data = download_game_data(gamePk, debug=debug)
+        dense_lines, _ = format_linescore(
+            extract_linescore_innings(game_data),
+            extract_teams_data(game_data),
+            venue=extract_venue_name(game_data),
+            decision_dict=extract_decisions(game_data),
+            wide_display=wide,
+        )
+        print()
+        [print(line) for line in dense_lines]
+        print()
+
 
 def main():
     ### parse CLI arguments
@@ -37,17 +50,7 @@ def main():
     ### do functionality
 
     if args.line:
-        game_data = download_game_data(args.game, debug=args.debug)
-        dense_lines, _ = format_linescore(
-            extract_linescore_innings(game_data),
-            extract_teams_data(game_data),
-            venue=extract_venue_name(game_data),
-            decision_dict=extract_decisions(game_data),
-            wide_display=args.wide,
-        )
-        print()
-        [print(line) for line in dense_lines]
-        print()
+        print_linescore(args.game, debug=args.debug, wide=args.wide)
 
     if args.box:
         game_data = download_game_data(args.game, debug=args.debug)
