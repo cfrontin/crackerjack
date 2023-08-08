@@ -2,10 +2,10 @@
 import os.path
 from pprint import pprint
 
-import boxscore
-import tools_mlbapi
+import boxscore_cli.boxscore as boxscore
+import boxscore_cli.tools_mlbapi as tools_mlbapi
 
-if __name__ == "__main__":
+def main():
 
     season = 2023
 
@@ -74,4 +74,9 @@ if __name__ == "__main__":
     last_day_completed = days_with_completed[-1]
 
     for gamePk in games_by_date[last_day_completed]["completed"]:
+        print(f"gamePk: {gamePk}")
         boxscore.print_linescore(gamePk, debug=False, wide=False)
+
+if __name__ == "__main__":
+    main()
+

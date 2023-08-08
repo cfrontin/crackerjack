@@ -21,4 +21,5 @@ packages = ["boxscore_cli",]
 
 [project.scripts]
 boxscore = "boxscore_cli.boxscore:main"
+fetchscores = "boxscore_cli.fetch_schedule:main"
 
