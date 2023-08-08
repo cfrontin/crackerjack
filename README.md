@@ -23,7 +23,7 @@ Instructions:
 
 ## Operation (beta mode)
 
-Currently, the front-end isn't built out, so games have to be requested manually by their MLB primary key (`gamePk`).
+Currently, the front-end isn't built out, so box scores for games have to be requested manually by their MLB primary key (`gamePk`).
 These are 6-digit (occasionally fewer) integer codes that are unique to each game.
 They can be found in the MLB GameDay urls, i.e. `718298` in [this box score](https://www.mlb.com/gameday/orioles-vs-braves/2023/05/05/718298/final/box):
 ```
