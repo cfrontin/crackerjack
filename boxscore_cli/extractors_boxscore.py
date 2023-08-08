@@ -3,9 +3,9 @@ import copy
 import re
 from collections import OrderedDict
 
-from tools_mlbapi import *
-import tools_mlbapi
-from tools_boxscore import *
+from boxscore_cli.tools_mlbapi import *
+import boxscore_cli.tools_mlbapi as tools_mlbapi
+from boxscore_cli.tools_boxscore import *
 
 def extract_info_box(
     data_game: dict,

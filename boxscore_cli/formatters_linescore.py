@@ -1,10 +1,10 @@
 
-from tools_mlbapi import *
-from tools_linescore import *
+from boxscore_cli.tools_mlbapi import *
+from boxscore_cli.tools_linescore import *
 
 # this should be reconfigured to be part of a settings file
-from formatters_boxscore import _CLI_LINE_LENGTH_DEFAULT
-from formatters_boxscore import _CLI_LINE_LENGTH_WIDE_DEFAULT
+from boxscore_cli.formatters_boxscore import _CLI_LINE_LENGTH_DEFAULT
+from boxscore_cli.formatters_boxscore import _CLI_LINE_LENGTH_WIDE_DEFAULT
 
 def format_linescore(
     linescoreinning_list: list[LineScoreInning],

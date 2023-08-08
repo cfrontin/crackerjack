@@ -9,13 +9,13 @@ import re
 
 import pprint as pp
 
-from tools_mlbapi import *
-from tools_linescore import *
-from tools_boxscore import *
-from tools_boxscore import *
-from extractors_boxscore import *
-from formatters_linescore import *
-from formatters_boxscore import *
+from boxscore_cli.tools_mlbapi import *
+from boxscore_cli.tools_linescore import *
+from boxscore_cli.tools_boxscore import *
+from boxscore_cli.tools_boxscore import *
+from boxscore_cli.extractors_boxscore import *
+from boxscore_cli.formatters_linescore import *
+from boxscore_cli.formatters_boxscore import *
 
 def print_linescore(gamePk, debug=False, wide=False):
         game_data = download_game_data(gamePk, debug=debug)
