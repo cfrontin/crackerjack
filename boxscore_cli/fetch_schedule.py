@@ -29,7 +29,7 @@ def main():
         inprogress_games = 0
         postponed_games = 0
 
-        games_today = {"scheduled": [], "imminent": [], "cancelled": [], "postponed": [], "completed": []}
+        games_today = {"scheduled": [], "imminent": [], "cancelled": [], "postponed": [], "inprogress": [], "completed": []}
 
         for game in date["games"]:
             gamePk = game.get("gamePk")
@@ -54,6 +54,9 @@ def main():
             elif codedGameState == "S":
                 scheduled_games += 1
                 games_today["scheduled"].append(gamePk)
+            elif codedGameState == "I":
+                inprogress_games += 1
+                games_today["inprogress"].append(gamePk)
             elif codedGameState is not None:
                 raise NotImplementedError(f"codedGameState: {codedGameState} not yet handled.")
 
