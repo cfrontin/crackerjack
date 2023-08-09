@@ -1,5 +1,5 @@
-
 import copy
+
 
 class BoxScorePitcher(object):
     """

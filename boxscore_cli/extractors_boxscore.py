@@ -1,4 +1,3 @@
-
 import copy
 import re
 from collections import OrderedDict
@@ -6,6 +5,7 @@ from collections import OrderedDict
 from boxscore_cli.tools_mlbapi import *
 import boxscore_cli.tools_mlbapi as tools_mlbapi
 from boxscore_cli.tools_boxscore import *
+
 
 def extract_info_box(
     data_game: dict,
@@ -142,7 +142,12 @@ def extract_boxscore_batter(data_game: dict) -> dict[str : list[BoxScoreBatter]]
             player_bsb = BoxScoreBatter(
                 player_data.get("useLastName"),
                 player_data.get("useName"),
-                "-".join([posi.get("abbreviation") for posi in player_game_data["allPositions"]]),
+                "-".join(
+                    [
+                        posi.get("abbreviation")
+                        for posi in player_game_data["allPositions"]
+                    ]
+                ),
                 player_game_data.get("jerseyNumber"),
                 player_game_data.get("battingOrder"),
                 player_batting_data.get("atBats"),
@@ -158,4 +163,3 @@ def extract_boxscore_batter(data_game: dict) -> dict[str : list[BoxScoreBatter]]
             lines_dict[tm_key].append(player_bsb)
 
     return lines_dict
-

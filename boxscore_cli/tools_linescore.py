@@ -1,4 +1,3 @@
-
 class LineScoreInning(object):
     """
     store a linescore inning
@@ -174,4 +173,3 @@ def extract_RHE(linescoreinning_list: list[LineScoreInning]):
     }
 
     return RHE_dict
-

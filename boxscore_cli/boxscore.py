@@ -17,18 +17,19 @@ from boxscore_cli.extractors_boxscore import *
 from boxscore_cli.formatters_linescore import *
 from boxscore_cli.formatters_boxscore import *
 
+
 def print_linescore(gamePk, debug=False, wide=False):
-        game_data = download_game_data(gamePk, debug=debug)
-        dense_lines, _ = format_linescore(
-            extract_linescore_innings(game_data),
-            extract_teams_data(game_data),
-            venue=extract_venue_name(game_data),
-            decision_dict=extract_decisions(game_data),
-            wide_display=wide,
-        )
-        print()
-        [print(line) for line in dense_lines]
-        print()
+    game_data = download_game_data(gamePk, debug=debug)
+    dense_lines, _ = format_linescore(
+        extract_linescore_innings(game_data),
+        extract_teams_data(game_data),
+        venue=extract_venue_name(game_data),
+        decision_dict=extract_decisions(game_data),
+        wide_display=wide,
+    )
+    print()
+    [print(line) for line in dense_lines]
+    print()
 
 
 def main():
@@ -86,7 +87,10 @@ def main():
             [print(x) for x in line_pitchers_dict[tmkey]]
             print()
             info_line_tmkey = extract_info_team(game_data, home_team=(tmkey == "home"))
-            [print(x) for x in format_info_team(info_line_tmkey, wide_display=args.wide)]
+            [
+                print(x)
+                for x in format_info_team(info_line_tmkey, wide_display=args.wide)
+            ]
             print()
         info_line_box = extract_info_box(game_data)
         [print(x) for x in format_info_box(info_line_box, wide_display=args.wide)]

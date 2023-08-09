@@ -1,4 +1,3 @@
-
 import copy
 import json
 import os
@@ -11,7 +10,7 @@ _PKG_DIR = os.path.join(_APP_DIR, os.pardir)  # where this package is installed
 _MLB_GAME_FORMAT_STRING = "http://statsapi.mlb.com/api/v1.1/game/%s/feed/live?hydrate=officials"  # 6 digit numeric gamepk as string
 _MLB_SCHEDULE_FORMAT_STRING = "http://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=%s&endDate=%s"  # dates as string: '2023-01-01'
 
-# labels known to the mlbapi
+# things known to the mlbapi
 _MLBAM_GAME_LABELS = [
     "Game Scores",
     "WP",
@@ -64,6 +63,39 @@ _MLBAM_TEAM_FIELDING_LABELS = [
     "Outfield assists",
     "Pickoffs",
 ]
+_MLBAM_TEAM_ABBREV = [
+    "OAK",
+    "PIT",
+    "SD",
+    "SEA",
+    "SF",
+    "STL",
+    "TB",
+    "TEX",
+    "TOR",
+    "MIN",
+    "PHI",
+    "ATL",
+    "CWS",
+    "MIA",
+    "NYY",
+    "MIL",
+    "LAA",
+    "AZ",
+    "BAL",
+    "BOS",
+    "CHC",
+    "CIN",
+    "CLE",
+    "COL",
+    "DET",
+    "HOU",
+    "KC",
+    "LAD",
+    "WSH",
+    "NYM",
+]
+
 
 class Team(object):
     """store a team"""
@@ -77,7 +109,7 @@ class Team(object):
     def __init__(self, location_name_, team_name_, short_name_, abbrev_, is_home_):
         self._location_name = location_name_
         self._team_name = team_name_
-        self._short_name= short_name_
+        self._short_name = short_name_
         self._abbrev = abbrev_
         self._is_home = is_home_
 
@@ -267,11 +299,13 @@ def extract_teams_data(data_game: dict) -> dict[str:Team]:
         assert key in data_teams
         data_team = data_teams[key]
         teamName = data_team["teamName"]
-        locationName = data_team["franchiseName"] # not! data_team["locationName"]
+        locationName = data_team["franchiseName"]  # not! data_team["locationName"]
         shortName = data_team["shortName"]
         abbreviation = data_team["abbreviation"]
 
-        teams[key] = Team(locationName, teamName, shortName, abbreviation, key == "home")
+        teams[key] = Team(
+            locationName, teamName, shortName, abbreviation, key == "home"
+        )
 
     return teams
 

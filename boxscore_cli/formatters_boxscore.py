@@ -1,4 +1,3 @@
-
 from collections import OrderedDict
 
 import boxscore_cli.tools_mlbapi as tools_mlbapi
@@ -7,6 +6,7 @@ from boxscore_cli.tools_boxscore import *
 # this should be reconfigured to be part of a settings file
 _CLI_LINE_LENGTH_DEFAULT = 80
 _CLI_LINE_LENGTH_WIDE_DEFAULT = 120
+
 
 def format_pitchers(
     pitcher_list: dict[str : list[BoxScorePitcher]],
@@ -63,7 +63,10 @@ def format_pitchers(
             staff_to_bsp[tmkey].append(bsp)
 
     resid_char = (
-        (_CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT) - indent_size * init_indent - stats_appetite_total - 4
+        (_CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT)
+        - indent_size * init_indent
+        - stats_appetite_total
+        - 4
     )
 
     for tmkey in ("away", "home"):
@@ -78,7 +81,7 @@ def format_pitchers(
         lines_out[tmkey].append(header_line)
         for pitcher_index in range(len(staff_to_stats[tmkey])):
             statline = staff_to_stats[tmkey][pitcher_index]
-            prefix_line = " %1d: " % (pitcher_index+1)
+            prefix_line = " %1d: " % (pitcher_index + 1)
             bsp = staff_to_bsp[tmkey][pitcher_index]
             name_sector = "%s%s, %s (#%s)" % (
                 prefix_line,
@@ -161,7 +164,10 @@ def format_batters(
             lineups_to_bsb[tmkey][lineup_pos].append(bsb)
 
     resid_char = (
-        (_CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT) - indent_size * init_indent - stats_appetite_total - 4
+        (_CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT)
+        - indent_size * init_indent
+        - stats_appetite_total
+        - 4
     )
 
     for tmkey in ("away", "home"):
@@ -215,11 +221,12 @@ def format_info_box(
     for key, values in info_box.items():
         working_str = " " * indent_size * init_indent + key + ": "
         for idx_value, value in enumerate(values):
-            if (
-                len(working_str)
-                + len(value)
-                + (2 if (idx_value + 1 != len(values)) else 0)
-                > (_CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT)
+            if len(working_str) + len(value) + (
+                2 if (idx_value + 1 != len(values)) else 0
+            ) > (
+                _CLI_LINE_LENGTH_WIDE_DEFAULT
+                if wide_display
+                else _CLI_LINE_LENGTH_DEFAULT
             ):
                 lines.append(working_str)
                 working_str = (
@@ -258,11 +265,12 @@ def format_info_team(
             for key, values in info_team[team_type].items():
                 working_str = " " * indent_size * next_indent + key + ": "
                 for idx_value, value in enumerate(values):
-                    if (
-                        len(working_str)
-                        + len(value)
-                        + (2 if (idx_value + 1 != len(values)) else 0)
-                        > (_CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT)
+                    if len(working_str) + len(value) + (
+                        2 if (idx_value + 1 != len(values)) else 0
+                    ) > (
+                        _CLI_LINE_LENGTH_WIDE_DEFAULT
+                        if wide_display
+                        else _CLI_LINE_LENGTH_DEFAULT
                     ):
                         lines.append(working_str)
                         working_str = (
@@ -277,4 +285,3 @@ def format_info_team(
                 lines.append(working_str)
 
     return lines
-

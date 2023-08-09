@@ -1,10 +1,10 @@
-
 from boxscore_cli.tools_mlbapi import *
 from boxscore_cli.tools_linescore import *
 
 # this should be reconfigured to be part of a settings file
 from boxscore_cli.formatters_boxscore import _CLI_LINE_LENGTH_DEFAULT
 from boxscore_cli.formatters_boxscore import _CLI_LINE_LENGTH_WIDE_DEFAULT
+
 
 def format_linescore(
     linescoreinning_list: list[LineScoreInning],
@@ -144,8 +144,12 @@ def format_linescore(
         substitution_set_line_away_sparse.append(RHE_dict[RHEcode]["away"])
         substitution_set_line_home_sparse.append(RHE_dict[RHEcode]["home"])
 
-    residual_spaces_dense = (_CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT) - spaces_linescore_dense
-    residual_spaces_sparse = (_CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT) - spaces_linescore_sparse
+    residual_spaces_dense = (
+        _CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT
+    ) - spaces_linescore_dense
+    residual_spaces_sparse = (
+        _CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT
+    ) - spaces_linescore_sparse
 
     spaces_team_fullname = max([len(team.full_name) for team in teams.values()])
     spaces_team_cityname = max([len(team.location_name) for team in teams.values()])
@@ -234,7 +238,11 @@ def format_linescore(
         venue = " " + venue + " "  # add leading and trailing space
         venue_line_ending = cross_char + horz_char * 3 + cross_char
         fill_horz_char_venue = (
-            (_CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT)
+            (
+                _CLI_LINE_LENGTH_WIDE_DEFAULT
+                if wide_display
+                else _CLI_LINE_LENGTH_DEFAULT
+            )
             - len(venue_line)
             - len(venue)
             - len(venue_line_ending)
@@ -262,7 +270,15 @@ def format_linescore(
                 decision_line += spacer
             else:
                 decision_line += cross_char
-        fill_horz_char_decision = (_CLI_LINE_LENGTH_WIDE_DEFAULT if wide_display else _CLI_LINE_LENGTH_DEFAULT) - len(decision_line) - 1
+        fill_horz_char_decision = (
+            (
+                _CLI_LINE_LENGTH_WIDE_DEFAULT
+                if wide_display
+                else _CLI_LINE_LENGTH_DEFAULT
+            )
+            - len(decision_line)
+            - 1
+        )
         decision_line += horz_char * fill_horz_char_decision + cross_char
         lines_dense.append(decision_line)
 
