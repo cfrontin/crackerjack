@@ -248,14 +248,12 @@ def format_linescore(
         )
         lines_dense.append(venue_line)
 
-    print(decision_dict)
     if type(decision_dict) == dict:
         decision_line = " " * indent_dense
         decision_line += cross_char + horz_char * 3 + cross_char
         spacer = cross_char + horz_char + cross_char
         dec_list = []
         for key in ["WP", "LP", "SV"]:
-            print(decision_dict)
             if decision_dict[key] is not None:
                 dec_list.append("%s: " % key + decision_dict[key])
         for idx_dec, dec_val in enumerate(dec_list):
