@@ -90,7 +90,9 @@ def format_linescore(
             " %" + str(max(lsi.get_appetite(), min_spaces_dense)) + "s %1s"
         )
         substitution_set_line_top_dense.append(lsi.inn_no)
-        substitution_set_line_away_dense.append(lsi.R_away)
+        substitution_set_line_away_dense.append(
+            lsi.R_away if lsi.R_away is not None else " " * lsi.get_appetite()
+        )
         substitution_set_line_home_dense.append(
             lsi.R_home if lsi.R_home is not None else " " * lsi.get_appetite()
         )
@@ -246,12 +248,14 @@ def format_linescore(
         )
         lines_dense.append(venue_line)
 
-    if decision_dict is not None:
+    print(decision_dict)
+    if type(decision_dict) == dict:
         decision_line = " " * indent_dense
         decision_line += cross_char + horz_char * 3 + cross_char
         spacer = cross_char + horz_char + cross_char
         dec_list = []
         for key in ["WP", "LP", "SV"]:
+            print(decision_dict)
             if decision_dict[key] is not None:
                 dec_list.append("%s: " % key + decision_dict[key])
         for idx_dec, dec_val in enumerate(dec_list):

@@ -291,24 +291,14 @@ def extract_linescore_innings(data_game: dict):
         # print("\tinn. no.:", data_inning["num"], "(%s)" % data_inning["ordinalNum"])
         lsi = LineScoreInning(data_inning["num"])
         lsi.ordinal = data_inning["ordinalNum"]
-        lsi.R_away = data_inning["away"]["runs"]
-        lsi.H_away = data_inning["away"]["hits"]
-        lsi.E_away = data_inning["away"]["errors"]
-        lsi.LOB_away = data_inning["away"]["leftOnBase"]
-        lsi.R_home = (
-            data_inning["home"]["runs"] if "runs" in data_inning["home"] else None
-        )
-        lsi.H_home = (
-            data_inning["home"]["hits"] if "hits" in data_inning["home"] else None
-        )
-        lsi.E_home = (
-            data_inning["home"]["errors"] if "errors" in data_inning["home"] else None
-        )
-        lsi.LOB_home = (
-            data_inning["home"]["leftOnBase"]
-            if "leftOnBase" in data_inning["home"]
-            else None
-        )
+        lsi.R_away = data_inning["away"].get("runs")
+        lsi.H_away = data_inning["away"].get("hits")
+        lsi.E_away = data_inning["away"].get("errors")
+        lsi.LOB_away = data_inning["away"].get("leftOnBase")
+        lsi.R_home = data_inning["home"].get("runs")
+        lsi.H_home = data_inning["home"].get("hits")
+        lsi.E_home = data_inning["home"].get("errors")
+        lsi.LOB_home = data_inning["home"].get("leftOnBase")
 
         lsi_list.append(lsi)
 
