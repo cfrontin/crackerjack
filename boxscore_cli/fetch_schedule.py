@@ -6,7 +6,7 @@ import boxscore_cli.tools_mlbapi as tools_mlbapi
 
 
 def main():
-    season = 2023
+    season = 2024
 
     mlbam_schedule_url = tools_mlbapi._MLB_SCHEDULE_FORMAT_STRING % (
         f"{season}-01-01",

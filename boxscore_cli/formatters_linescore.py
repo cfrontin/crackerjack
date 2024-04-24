@@ -121,6 +121,8 @@ def format_linescore(
     # work on RHE ending
     spaces_linescore_sparse += 2  # buffer spaces before summary
     format_line_sparse += " -"
+    spaces_linescore_dense += 1
+    format_line_dense += "\b" + 2*cross_char
     RHE_dict = extract_RHE(linescoreinning_list)  # get the RHE stuff
     for RHEcode in ["R", "H", "E"]:
         spaces_linescore_dense += 1  # buffer space before summary term
@@ -170,7 +172,7 @@ def format_linescore(
         substitution_set_name_bot_dense.append(horz_char * residual_spaces_dense)
     elif residual_spaces_dense > spaces_team_shortname:
         format_name_dense += (
-            "%-" + str(residual_spaces_dense) + "s"
+            "%" + str(residual_spaces_dense) + "s"
         )  # fill remaining spaces
         substitution_set_name_top_dense.append(horz_char * residual_spaces_dense)
         substitution_set_name_away_dense.append(dtf(teams["away"].short_name))
@@ -178,7 +180,7 @@ def format_linescore(
         substitution_set_name_bot_dense.append(horz_char * residual_spaces_dense)
     elif residual_spaces_dense > spaces_team_cityname:
         format_name_dense += (
-            "%-" + str(residual_spaces_dense) + "s"
+            "%" + str(residual_spaces_dense) + "s"
         )  # fill remaining spaces
         substitution_set_name_top_dense.append(horz_char * residual_spaces_dense)
         substitution_set_name_away_dense.append(dtf(teams["away"].location_name))
