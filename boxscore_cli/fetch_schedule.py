@@ -53,6 +53,9 @@ def main():
             if codedGameState == "F":
                 completed_games += 1
                 games_today["completed"].append(gamePk)
+            elif codedGameState == "O":
+                completed_games += 1
+                games_today["completed"].append(gamePk)
             elif codedGameState == "C":
                 cancelled_games += 1
                 games_today["cancelled"].append(gamePk)
