@@ -90,7 +90,7 @@ def format_linescore(
         spaces_linescore_dense += 1  # buffer space after
         spaces_linescore_dense += 1  # border char after
         format_line_dense += (
-            " %" + str(max(lsi.get_appetite(), min_spaces_dense)) + "s %1s"
+            " "+Fore.CYAN+"%" + str(max(lsi.get_appetite(), min_spaces_dense)) + "s"+Fore.RESET+" %1s"
         )
         substitution_set_line_top_dense.append(lsi.inn_no)
         substitution_set_line_away_dense.append(
@@ -132,7 +132,7 @@ def format_linescore(
         spaces_linescore_dense += RHE_dict[RHEcode]["spaces"]
         spaces_linescore_dense += 1  # buffer space after summary term
         spaces_linescore_dense += 1  # border char after summary term
-        format_line_dense += " " + Fore.RED + "%" + str(RHE_dict[RHEcode]["spaces"]) + "s" + Style.RESET_ALL + " %1s"
+        format_line_dense += " " + Fore.MAGENTA + "%" + str(RHE_dict[RHEcode]["spaces"]) + "s" + Fore.RESET + " %1s"
         substitution_set_line_top_dense.append(RHEcode)
         substitution_set_line_away_dense.append(RHE_dict[RHEcode]["away"])
         substitution_set_line_home_dense.append(RHE_dict[RHEcode]["home"])
