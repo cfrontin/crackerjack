@@ -1,3 +1,6 @@
+from colorama import Fore, Back, Style
+
+
 from boxscore_cli.tools_mlbapi import *
 from boxscore_cli.tools_linescore import *
 
@@ -129,7 +132,7 @@ def format_linescore(
         spaces_linescore_dense += RHE_dict[RHEcode]["spaces"]
         spaces_linescore_dense += 1  # buffer space after summary term
         spaces_linescore_dense += 1  # border char after summary term
-        format_line_dense += " %" + str(RHE_dict[RHEcode]["spaces"]) + "s %1s"
+        format_line_dense += " " + Fore.RED + "%" + str(RHE_dict[RHEcode]["spaces"]) + "s" + Style.RESET_ALL + " %1s"
         substitution_set_line_top_dense.append(RHEcode)
         substitution_set_line_away_dense.append(RHE_dict[RHEcode]["away"])
         substitution_set_line_home_dense.append(RHE_dict[RHEcode]["home"])
