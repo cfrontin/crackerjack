@@ -256,7 +256,7 @@ def format_linescore(
         venue_line += (
             horz_char * fill_horz_char_venue
             + cross_char
-            + dtf(venue)
+            + Fore.GREEN + dtf(venue) + Fore.RESET
             + venue_line_ending
         )
         lines_dense.append(venue_line)
