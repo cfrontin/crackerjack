@@ -9,6 +9,7 @@ _APP_DIR = os.path.split(__file__)[0]  # where this file is installed
 _PKG_DIR = os.path.join(_APP_DIR, os.pardir)  # where this package is installed
 _MLB_GAME_FORMAT_STRING = "http://statsapi.mlb.com/api/v1.1/game/%s/feed/live?hydrate=officials"  # 6 digit numeric gamepk as string
 _MLB_SCHEDULE_FORMAT_STRING = "http://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=%s&endDate=%s"  # dates as string: '2023-01-01'
+_MLB_STANDINGS_FORMAT_STRING = "http://statsapi.mlb.com/api/v1/standings?leagueId=%s"  # 3 digit numeric leagueId as string
 
 # things known to the mlbapi
 _MLBAM_GAME_LABELS = [
@@ -96,6 +97,14 @@ _MLBAM_TEAM_ABBREV = [
     "NYM",
 ]
 
+_MLBAM_LEAGUEID_AL = 103
+_MLBAM_LEAGUEID_NL = 104
+_MLBAM_DIVISIONID_AL_WEST = 200
+_MLBAM_DIVISIONID_AL_EAST = 201
+_MLBAM_DIVISIONID_AL_CENTRAL = 202
+_MLBAM_DIVISIONID_NL_WEST = 203
+_MLBAM_DIVISIONID_NL_EAST = 204
+_MLBAM_DIVISIONID_NL_CENTRAL = 205
 
 class Team(object):
     """store a team"""

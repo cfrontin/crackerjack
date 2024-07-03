@@ -7,24 +7,12 @@ from pprint import pprint
 import boxscore_cli.boxscore as boxscore
 import boxscore_cli.tools_mlbapi as tools_mlbapi
 
-
-def main():
-    ### parse CLI arguments
-
-    parser = argparse.ArgumentParser(
-        prog="fetchscores",
-        description="cfrontin's CLI boxscore and linescore printer",
-        epilog="strike three!\a\n",
-    )
-    parser.add_argument("-t", "--today", action="store_true", default=False)
-    parser.add_argument("-y", "--yesterday", action="store_true", default=False)
-    parser.add_argument("-w", "--wide", action="store_true", default=False)
-    parser.add_argument("--debug", action="store_true", default=False)
-
-    args = parser.parse_args()
-
-
-    season = 2024
+def get_daily_games(
+        season=datetime.today().year,
+        fetch_today=True,
+        fetch_yesterday=False,
+        print_wide=False,
+):
 
     mlbam_schedule_url = tools_mlbapi._MLB_SCHEDULE_FORMAT_STRING % (
         f"{season}-01-01",
@@ -94,6 +82,9 @@ def main():
             elif codedGameState == "I":
                 inprogress_games += 1
                 games_thisday["inprogress"].append(gamePk)
+            elif codedGameState == "U":
+                inprogress_games += 1
+                games_thisday["inprogress"].append(gamePk)
             elif codedGameState is not None:
                 raise NotImplementedError(
                     f"codedGameState: {codedGameState} not yet handled."
@@ -122,29 +113,47 @@ def main():
     ]
     last_day_completed = days_with_completed[-1]
 
-    if args.yesterday:
+    if fetch_yesterday:
         print("\nYESTERDAY'S GAMES:\n")
         if yesterday is None:
             print("No games completed yesterday.\n")
         else:
             for gamePk in yesterday["completed"]:
                 print(f"gamePk: {gamePk}")
-                boxscore.print_linescore(gamePk, debug=False, wide=args.wide)
+                boxscore.print_linescore(gamePk, debug=False, wide=print_wide)
 
-    if args.today:
+    if fetch_today:
         print("\nTODAY'S GAMES:\n")
         if today is None:
             print("No games completed yet today.\n")
         else:
             for gamePk in today["completed"]:
                 print(f"gamePk: {gamePk}")
-                boxscore.print_linescore(gamePk, debug=False, wide=args.wide)
+                boxscore.print_linescore(gamePk, debug=False, wide=print_wide)
 
     else:
         for gamePk in games_by_date[last_day_completed]["completed"]:
             print(f"gamePk: {gamePk}")
-            boxscore.print_linescore(gamePk, debug=False, wide=args.wide)
+            boxscore.print_linescore(gamePk, debug=False, wide=print_wide)
 
+def main():
+    ### parse CLI arguments
+
+    parser = argparse.ArgumentParser(
+        prog="fetchscores",
+        description="cfrontin's CLI boxscore and linescore printer",
+        epilog="strike three!\a\n",
+    )
+    parser.add_argument("-t", "--today", action="store_true", default=False)
+    parser.add_argument("-y", "--yesterday", action="store_true", default=False)
+    parser.add_argument("-w", "--wide", action="store_true", default=False)
+    parser.add_argument("--debug", action="store_true", default=False)
+
+    args = parser.parse_args()
+
+
+
+    get_daily_games(fetch_today=args.today, fetch_yesterday=args.yesterday)
 
 if __name__ == "__main__":
     main()
