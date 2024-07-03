@@ -55,12 +55,12 @@ for id_team, team_data in team_list.items():
   char_available = _CLI_LINE_LENGTH_WIDE_DEFAULT - 2
 
   if char_available > len(wins_vec):
-    sparkline = "".join([Fore.GREEN+"^" if v else Fore.RED+"v" for v in wins_vec])+Fore.RESET
     output_lines = (
-        f"{team_data["abbreviation"]:>4s} "
+        f"{team_data["abbreviation"]:>3s} "
         + f"{sum(wins_vec)}-{sum([not v for v in wins_vec])}:\n"
     )
 
+    sparkline = "".join([Fore.GREEN+"^" if v else Fore.RED+"v" for v in wins_vec])+Fore.RESET
     output_lines += (
         f"  {sparkline:>{char_available}}"
     )
@@ -71,19 +71,26 @@ for id_team, team_data in team_list.items():
         f"{team_data["abbreviation"]:>4s} "
         + f"{sum(wins_vec)}-{sum([not v for v in wins_vec])}:\n"
     )
-    while len(wins_vec_working) > char_available:
-      wvh = wins_vec_working[:char_available]
-      wins_vec_working = wins_vec_working[char_available:]
 
-      sparkline = "".join([Fore.GREEN+"^" if v else Fore.RED+"v" for v in wvh])+Fore.RESET
-      output_lines += (
-          f"  {sparkline}\n"
-      )
-    remainder_spaces = char_available - len(wins_vec_working)
-    sparkline = "".join([Fore.GREEN+"^" if v else Fore.RED+"v" for v in wins_vec_working])+Fore.RESET
+    char_available -= 3
+    sparkline = "..."+"".join([Fore.GREEN+"^" if v else Fore.RED+"v" for v in wins_vec[-char_available:]])+Fore.RESET
     output_lines += (
-        f"  {"".join([" "]*remainder_spaces)}{sparkline}"
+        f"  {sparkline:>{char_available}}"
     )
+
+    # while len(wins_vec_working) > char_available:
+    #   wvh = wins_vec_working[:char_available]
+    #   wins_vec_working = wins_vec_working[char_available:]
+
+    #   sparkline = "".join([Fore.GREEN+"^" if v else Fore.RED+"v" for v in wvh])+Fore.RESET
+    #   output_lines += (
+    #       f"  {sparkline}\n"
+    #   )
+    # remainder_spaces = char_available - len(wins_vec_working)
+    # sparkline = "".join([Fore.GREEN+"^" if v else Fore.RED+"v" for v in wins_vec_working])+Fore.RESET
+    # output_lines += (
+    #     f"  {"".join([" "]*remainder_spaces)}{sparkline}"
+    # )
 
 
   team_output.append({
