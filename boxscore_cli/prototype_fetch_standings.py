@@ -5,6 +5,10 @@ import argparse
 from pprint import pprint
 from re import S
 
+import pandas as pd
+
+from colorama import Fore, Back, Style
+
 # import boxscore_cli.boxscore as boxscore
 import boxscore_cli.tools_mlbapi as tools_mlbapi
 
@@ -51,6 +55,8 @@ division_map = {
   },
 }
 
+wc_list = []
+
 for lg_id, league_data in league_map.items():
     lg_name = league_data["abbrev"]
 
@@ -64,7 +70,7 @@ for lg_id, league_data in league_map.items():
         id_div = record_div['division']['id']
         print(f"{division_map[id_div]["shortname"]}")
 
-        for record_tm in record_div["teamRecords"]:
+        for rank_tm, record_tm in enumerate(record_div["teamRecords"]):
 
             name_team = record_tm['team']['name']
             id_team = record_tm['team']['id']
@@ -78,12 +84,27 @@ for lg_id, league_data in league_map.items():
             ra_team = record_tm["runsAllowed"]
             streak_team = record_tm["streak"]["streakCode"]
 
+            wc_list.append({
+                "name": name_team,
+                "id": id_team,
+                "wins": wins_team,
+                "losses": losses_team,
+                "wpct": wpct_team,
+                "wcgb": wcgb_team,
+                "streak": streak_team,
+                "lg_id": lg_id,
+                "div_id": id_div,
+                "lg_name": lg_name,
+                "div_name": division_map[id_div]["shortname"],
+                "div_rank": rank_tm+1,
+            })
+
             print(f"\t{name_team}")
             print(
-                f"\t\tWINS: {wins_team:3d}; "
-                + f"LOSSES: {losses_team:3d}; "
+                f"\t\tWINS: {Fore.GREEN}{wins_team:3d}{Fore.RESET}; "
+                + f"LOSSES: {Fore.RED}{losses_team:3d}{Fore.RESET}; "
                 + f"WPCT: {wpct_team:4.03f}; "
-                + f"STREAK: {streak_team:3s}\n"
+                + f"STREAK: {Fore.GREEN if streak_team.startswith("W") else Fore.RED if streak_team.startswith("L") else Fore.RESET}{streak_team:3s}{Fore.RESET}\n"
                 + f"\t\tGB: {gb_team:4s}; "
                 + f"WCGB: {wcgb_team:4s}; "
                 + f"RS: {rs_team:4d}; "
@@ -93,3 +114,11 @@ for lg_id, league_data in league_map.items():
 
         print()
 
+df_standings = pd.DataFrame(wc_list)
+df_standings.sort_values("wpct", ascending=False, inplace=True)
+
+for lg in ["AL", "NL"]:
+  print(df_standings[(df_standings["lg_name"] == lg) & (df_standings["div_rank"] == 1)])
+  print()
+  print(df_standings[(df_standings["lg_name"] == lg) & (df_standings["div_rank"] != 1)])
+  print()

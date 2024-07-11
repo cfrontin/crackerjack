@@ -62,7 +62,7 @@ for id_team, team_data in team_list.items():
 
     sparkline = "".join([Fore.GREEN+"^" if v else Fore.RED+"v" for v in wins_vec])+Fore.RESET
     output_lines += (
-        f"  {sparkline:>{char_available}}"
+        f"  {sparkline:>{char_available}s}"
     )
   else:
     wins_vec_working = wins_vec.copy()
@@ -75,23 +75,8 @@ for id_team, team_data in team_list.items():
     char_available -= 3
     sparkline = "..."+"".join([Fore.GREEN+"^" if v else Fore.RED+"v" for v in wins_vec[-char_available:]])+Fore.RESET
     output_lines += (
-        f"  {sparkline:>{char_available}}"
+        f"  {sparkline:>{char_available}s}"
     )
-
-    # while len(wins_vec_working) > char_available:
-    #   wvh = wins_vec_working[:char_available]
-    #   wins_vec_working = wins_vec_working[char_available:]
-
-    #   sparkline = "".join([Fore.GREEN+"^" if v else Fore.RED+"v" for v in wvh])+Fore.RESET
-    #   output_lines += (
-    #       f"  {sparkline}\n"
-    #   )
-    # remainder_spaces = char_available - len(wins_vec_working)
-    # sparkline = "".join([Fore.GREEN+"^" if v else Fore.RED+"v" for v in wins_vec_working])+Fore.RESET
-    # output_lines += (
-    #     f"  {"".join([" "]*remainder_spaces)}{sparkline}"
-    # )
-
 
   team_output.append({
       "abbrev": team_data["abbreviation"],
