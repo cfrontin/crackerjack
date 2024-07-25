@@ -156,7 +156,7 @@ lg_lines = {
 }
 
 # make the pct pretty
-df_standings.PCT = [f"{np.round(v):5.03f}" for v in df_standings.PCT]
+df_standings.PCT = [f"{np.round(v,3):5.03f}" for v in df_standings.PCT]
 df_standings.DIV= df_standings.DIV.str[3:].str[0].str.cat(df_standings.RK.astype(str))
 
 # loop over the dictionary of columns
