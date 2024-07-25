@@ -142,37 +142,37 @@ char_dict = {
 }
 
 # create the lines for the standings display
-sep_line = "#"
-head_line = "#"
+sep_line = "•"
+head_line = "•"
 lg_lines = {
     "AL": {
-        "head": "#",
+        "head": "•",
         "EAST": {
-            "head": "#",
-            "team_lines": ["#"]*5
+            "head": "•",
+            "team_lines": ["•"]*5
         },
         "CENTRAL": {
-            "head": "#",
-            "team_lines": ["#"]*5
+            "head": "•",
+            "team_lines": ["•"]*5
         },
         "WEST": {
-            "head": "#",
-            "team_lines": ["#"]*5
+            "head": "•",
+            "team_lines": ["•"]*5
         },
     },
     "NL": {
-        "head": "#",
+        "head": "•",
         "EAST": {
-            "head": "#",
-            "team_lines": ["#"]*5
+            "head": "•",
+            "team_lines": ["•"]*5
         },
         "CENTRAL": {
-            "head": "#",
-            "team_lines": ["#"]*5
+            "head": "•",
+            "team_lines": ["•"]*5
         },
         "WEST": {
-            "head": "#",
-            "team_lines": ["#"]*5
+            "head": "•",
+            "team_lines": ["•"]*5
         },
     },
 }
@@ -183,16 +183,16 @@ df_standings.PCT = [f"{np.round(v,3):5.03f}" for v in df_standings.PCT]
 # loop over the dictionary of columns
 for k, v in char_dict.items():
     head_line += " "
-    sep_line += "#"
+    sep_line += "•"
     for lg in ["AL", "NL"]:
-        lg_lines[lg]["head"] += " " # if k == "TEAM" else "#"
+        lg_lines[lg]["head"] += " " # if k == "TEAM" else "•"
         for div in ["EAST", "CENTRAL", "WEST"]:
-            lg_lines[lg][div]["head"] += " " # if k == "TEAM" else "#"
+            lg_lines[lg][div]["head"] += " " # if k == "TEAM" else "•"
             for idx, row in df_standings[df_standings['div_name'].str.upper() == f"{lg} {div}"].reset_index().iterrows():
                 lg_lines[lg][div]["team_lines"][idx] += " "
             
     head_line += f"{k:>{v}s}"
-    sep_line += "#"*v
+    sep_line += "•"*v
     for lg in ["AL", "NL"]:
         if k == "TEAM":
             lg_lines[lg]["head"] += f"{'AMERICAN LEAGUE' if lg == 'AL' else 'NATIONAL LEAGUE':<{v}s}"
@@ -206,14 +206,14 @@ for k, v in char_dict.items():
             for idx, row in df_standings[df_standings['div_name'].str.upper() == f"{lg} {div}"].reset_index().iterrows():
                 lg_lines[lg][div]["team_lines"][idx] += f"{row[k]:>{v}}"
     
-    head_line += " #"
-    sep_line += "##"
+    head_line += " •"
+    sep_line += "••"
     for lg in ["AL", "NL"]:
-        lg_lines[lg]["head"] += " #" if k == "TEAM" else " #"
+        lg_lines[lg]["head"] += " •" if k == "TEAM" else " •"
         for div in ["EAST", "CENTRAL", "WEST"]:
-            lg_lines[lg][div]["head"] += " #" if k == "TEAM" else " #"
+            lg_lines[lg][div]["head"] += " •" if k == "TEAM" else " •"
             for idx, row in df_standings[df_standings['div_name'].str.upper() == f"{lg} {div}"].reset_index().iterrows():
-                lg_lines[lg][div]["team_lines"][idx] += " #"
+                lg_lines[lg][div]["team_lines"][idx] += " •"
 
 # make a standard standings printout
 

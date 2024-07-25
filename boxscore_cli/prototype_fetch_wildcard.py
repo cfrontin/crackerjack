@@ -140,18 +140,18 @@ char_dict = {
 }
 
 # create the lines for the standings display
-sep_line = "#"
-head_line = "#"
+sep_line = "•"
+head_line = "•"
 lg_lines = {
     "AL": {
-        "head": "#",
-        "leader_lines": ["#"]*3,
-        "wc_lines": ["#"]*12,
+        "head": "•",
+        "leader_lines": ["•"]*3,
+        "wc_lines": ["•"]*12,
     },
     "NL": {
-        "head": "#",
-        "leader_lines": ["#"]*3,
-        "wc_lines": ["#"]*12,
+        "head": "•",
+        "leader_lines": ["•"]*3,
+        "wc_lines": ["•"]*12,
     },
 }
 
@@ -162,16 +162,16 @@ df_standings.DIV= df_standings.DIV.str[3:].str[0].str.cat(df_standings.RK.astype
 # loop over the dictionary of columns
 for k, v in char_dict.items():
     head_line += " "
-    sep_line += "#"
+    sep_line += "•"
     for lg in ["AL", "NL"]:
-        lg_lines[lg]["head"] += " " # if k == "TEAM" else "#"
+        lg_lines[lg]["head"] += " " # if k == "TEAM" else "•"
         for idx, row in df_standings[(df_standings['lg_name'].str.upper() == lg) & (df_standings['RK'] == 1)].reset_index().iterrows():
             lg_lines[lg]["leader_lines"][idx] += " "
         for idx, row in df_standings[(df_standings['lg_name'].str.upper() == lg) & (df_standings['RK'] != 1)].reset_index().iterrows():
             lg_lines[lg]["wc_lines"][idx] += " "
             
     head_line += f"{k:>{v}s}"
-    sep_line += "#"*v
+    sep_line += "•"*v
     for lg in ["AL", "NL"]:
         if k == "TEAM":
             lg_lines[lg]["head"] += f"{'AMERICAN LEAGUE' if lg == 'AL' else 'NATIONAL LEAGUE':<{v}s}"
@@ -182,14 +182,14 @@ for k, v in char_dict.items():
         for idx, row in df_standings[(df_standings['lg_name'].str.upper() == lg) & (df_standings['RK'] != 1)].reset_index().iterrows():
             lg_lines[lg]["wc_lines"][idx] += f"{row[k]:>{v}}"
     
-    head_line += " #"
-    sep_line += "##"
+    head_line += " •"
+    sep_line += "••"
     for lg in ["AL", "NL"]:
-        lg_lines[lg]["head"] += " #" if k == "TEAM" else " #"
+        lg_lines[lg]["head"] += " •" if k == "TEAM" else " •"
         for idx, row in df_standings[(df_standings['lg_name'].str.upper() == lg) & (df_standings['RK'] == 1)].reset_index().iterrows():
-                lg_lines[lg]["leader_lines"][idx] += " #"
+                lg_lines[lg]["leader_lines"][idx] += " •"
         for idx, row in df_standings[(df_standings['lg_name'].str.upper() == lg) & (df_standings['RK'] != 1)].reset_index().iterrows():
-                lg_lines[lg]["wc_lines"][idx] += " #"
+                lg_lines[lg]["wc_lines"][idx] += " •"
 
 # make a wildcard standings printout
 
