@@ -117,14 +117,14 @@ df_standings.rename(
         'losses': 'L',
         'wpct': 'PCT',
         'wcgb': 'WCGB',
-        'streak': 'STK',
+        'streak': 'STRK',
         'rs_team': 'RS',
         'ra_team': 'RA',
-        'rd_team': 'RD',
+        'div_name': 'DIV',
+        'div_rank': 'RK',
     },
     inplace=True,
 )
-# streak lg_name    div_name  div_rank  rs_team  ra_team  rd_team
 
 # title to length of field map
 char_dict = {
@@ -133,12 +133,10 @@ char_dict = {
     "L": 3,
     "PCT": 5,
     "WCGB": 5,
-    "STK": 3,
+    "STRK": 4,
     "RS": 4,
     "RA": 4,
-    "RD": 4,
-    # "DIV": 10,
-    # "RK DIV": 6,
+    "DIV": 3,
 }
 
 # create the lines for the standings display
@@ -147,38 +145,19 @@ head_line = "#"
 lg_lines = {
     "AL": {
         "head": "#",
-        "EAST": {
-            "head": "#",
-            "team_lines": ["#"]*5
-        },
-        "CENTRAL": {
-            "head": "#",
-            "team_lines": ["#"]*5
-        },
-        "WEST": {
-            "head": "#",
-            "team_lines": ["#"]*5
-        },
+        "leader_lines": ["#"]*3,
+        "wc_lines": ["#"]*12,
     },
     "NL": {
         "head": "#",
-        "EAST": {
-            "head": "#",
-            "team_lines": ["#"]*5
-        },
-        "CENTRAL": {
-            "head": "#",
-            "team_lines": ["#"]*5
-        },
-        "WEST": {
-            "head": "#",
-            "team_lines": ["#"]*5
-        },
+        "leader_lines": ["#"]*3,
+        "wc_lines": ["#"]*12,
     },
 }
 
 # make the pct pretty
-df_standings.PCT = [f"{np.round(v,3):5.03f}" for v in df_standings.PCT]
+df_standings.PCT = [f"{np.round(v):5.03f}" for v in df_standings.PCT]
+df_standings.DIV= df_standings.DIV.str[3:].str[0].str.cat(df_standings.RK.astype(str))
 
 # loop over the dictionary of columns
 for k, v in char_dict.items():
@@ -186,10 +165,10 @@ for k, v in char_dict.items():
     sep_line += "#"
     for lg in ["AL", "NL"]:
         lg_lines[lg]["head"] += " " # if k == "TEAM" else "#"
-        for div in ["EAST", "CENTRAL", "WEST"]:
-            lg_lines[lg][div]["head"] += " " # if k == "TEAM" else "#"
-            for idx, row in df_standings[df_standings['div_name'].str.upper() == f"{lg} {div}"].reset_index().iterrows():
-                lg_lines[lg][div]["team_lines"][idx] += " "
+        for idx, row in df_standings[(df_standings['lg_name'].str.upper() == lg) & (df_standings['RK'] == 1)].reset_index().iterrows():
+            lg_lines[lg]["leader_lines"][idx] += " "
+        for idx, row in df_standings[(df_standings['lg_name'].str.upper() == lg) & (df_standings['RK'] != 1)].reset_index().iterrows():
+            lg_lines[lg]["wc_lines"][idx] += " "
             
     head_line += f"{k:>{v}s}"
     sep_line += "#"*v
@@ -197,60 +176,41 @@ for k, v in char_dict.items():
         if k == "TEAM":
             lg_lines[lg]["head"] += f"{'AMERICAN LEAGUE' if lg == 'AL' else 'NATIONAL LEAGUE':<{v}s}"
         else:
-            lg_lines[lg]["head"] += " "*v
-        for div in ["EAST", "CENTRAL", "WEST"]:
-            if k == "TEAM":
-                lg_lines[lg][div]["head"] += f"{' '*2 + lg + ' ' + div:<{v}s}"
-            else:
-                lg_lines[lg][div]["head"] += f"{k:>{v}s}"
-            for idx, row in df_standings[df_standings['div_name'].str.upper() == f"{lg} {div}"].reset_index().iterrows():
-                lg_lines[lg][div]["team_lines"][idx] += f"{row[k]:>{v}}"
+            lg_lines[lg]["head"] += f"{k:>{v}s}" # " "*v
+        for idx, row in df_standings[(df_standings['lg_name'].str.upper() == lg) & (df_standings['RK'] == 1)].reset_index().iterrows():
+            lg_lines[lg]["leader_lines"][idx] += f"{row[k]:>{v}}"
+        for idx, row in df_standings[(df_standings['lg_name'].str.upper() == lg) & (df_standings['RK'] != 1)].reset_index().iterrows():
+            lg_lines[lg]["wc_lines"][idx] += f"{row[k]:>{v}}"
     
     head_line += " #"
     sep_line += "##"
     for lg in ["AL", "NL"]:
         lg_lines[lg]["head"] += " #" if k == "TEAM" else " #"
-        for div in ["EAST", "CENTRAL", "WEST"]:
-            lg_lines[lg][div]["head"] += " #" if k == "TEAM" else " #"
-            for idx, row in df_standings[df_standings['div_name'].str.upper() == f"{lg} {div}"].reset_index().iterrows():
-                lg_lines[lg][div]["team_lines"][idx] += " #"
+        for idx, row in df_standings[(df_standings['lg_name'].str.upper() == lg) & (df_standings['RK'] == 1)].reset_index().iterrows():
+                lg_lines[lg]["leader_lines"][idx] += " #"
+        for idx, row in df_standings[(df_standings['lg_name'].str.upper() == lg) & (df_standings['RK'] != 1)].reset_index().iterrows():
+                lg_lines[lg]["wc_lines"][idx] += " #"
 
-# make a standard standings printout
+# make a wildcard standings printout
 
 print()
 print(sep_line)
 print(lg_lines["AL"]["head"])
-print(lg_lines["AL"]["EAST"]["head"])
 print(sep_line)
-for line in lg_lines["AL"]["EAST"]["team_lines"]:
+for line in lg_lines["AL"]["leader_lines"]:
     print(line)
 print(sep_line)
-print(lg_lines["AL"]["CENTRAL"]["head"])
-print(sep_line)
-for line in lg_lines["AL"]["CENTRAL"]["team_lines"]:
-    print(line)
-print(sep_line)
-print(lg_lines["AL"]["WEST"]["head"])
-print(sep_line)
-for line in lg_lines["AL"]["WEST"]["team_lines"]:
+for line in lg_lines["AL"]["wc_lines"]:
     print(line)
 print(sep_line)
 print()
 print(sep_line)
 print(lg_lines["NL"]["head"])
-print(lg_lines["NL"]["EAST"]["head"])
 print(sep_line)
-for line in lg_lines["NL"]["EAST"]["team_lines"]:
+for line in lg_lines["NL"]["leader_lines"]:
     print(line)
 print(sep_line)
-print(lg_lines["NL"]["CENTRAL"]["head"])
-print(sep_line)
-for line in lg_lines["NL"]["CENTRAL"]["team_lines"]:
-    print(line)
-print(sep_line)
-print(lg_lines["NL"]["WEST"]["head"])
-print(sep_line)
-for line in lg_lines["NL"]["WEST"]["team_lines"]:
+for line in lg_lines["NL"]["wc_lines"]:
     print(line)
 print(sep_line)
 print()
