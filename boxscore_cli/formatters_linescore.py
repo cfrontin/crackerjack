@@ -90,7 +90,13 @@ def format_linescore(
         spaces_linescore_dense += 1  # buffer space after
         spaces_linescore_dense += 1  # border char after
         format_line_dense += (
-            " "+Fore.CYAN+"%" + str(max(lsi.get_appetite(), min_spaces_dense)) + "s"+Fore.RESET+" %1s"
+            " "
+            + Fore.CYAN
+            + "%"
+            + str(max(lsi.get_appetite(), min_spaces_dense))
+            + "s"
+            + Fore.RESET
+            + " %1s"
         )
         substitution_set_line_top_dense.append(lsi.inn_no)
         substitution_set_line_away_dense.append(
@@ -125,14 +131,22 @@ def format_linescore(
     spaces_linescore_sparse += 2  # buffer spaces before summary
     format_line_sparse += " -"
     spaces_linescore_dense += 1
-    format_line_dense += "\b" + 2*cross_char
+    format_line_dense += "\b" + 2 * cross_char
     RHE_dict = extract_RHE(linescoreinning_list)  # get the RHE stuff
     for RHEcode in ["R", "H", "E"]:
         spaces_linescore_dense += 1  # buffer space before summary term
         spaces_linescore_dense += RHE_dict[RHEcode]["spaces"]
         spaces_linescore_dense += 1  # buffer space after summary term
         spaces_linescore_dense += 1  # border char after summary term
-        format_line_dense += " " + Fore.MAGENTA + "%" + str(RHE_dict[RHEcode]["spaces"]) + "s" + Fore.RESET + " %1s"
+        format_line_dense += (
+            " "
+            + Fore.WHITE
+            + "%"
+            + str(RHE_dict[RHEcode]["spaces"])
+            + "s"
+            + Fore.RESET
+            + " %1s"
+        )
         substitution_set_line_top_dense.append(RHEcode)
         substitution_set_line_away_dense.append(RHE_dict[RHEcode]["away"])
         substitution_set_line_home_dense.append(RHE_dict[RHEcode]["home"])
@@ -256,7 +270,9 @@ def format_linescore(
         venue_line += (
             horz_char * fill_horz_char_venue
             + cross_char
-            + Fore.GREEN + dtf(venue) + Fore.RESET
+            + Fore.GREEN
+            + dtf(venue)
+            + Fore.RESET
             + venue_line_ending
         )
         lines_dense.append(venue_line)

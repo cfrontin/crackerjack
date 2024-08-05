@@ -17,43 +17,43 @@ from formatters_boxscore import _CLI_LINE_LENGTH_DEFAULT
 from formatters_boxscore import _CLI_LINE_LENGTH_WIDE_DEFAULT
 
 league_map = {
-  tools_mlbapi._MLBAM_LEAGUEID_AL: {
-    "id": tools_mlbapi._MLBAM_LEAGUEID_AL,
-    "name": "American",
-    "abbrev": "AL",
-  },
-  tools_mlbapi._MLBAM_LEAGUEID_NL: {
-    "id": tools_mlbapi._MLBAM_LEAGUEID_NL,
-    "name": "National",
-    "abbrev": "NL",
-  },
+    tools_mlbapi._MLBAM_LEAGUEID_AL: {
+        "id": tools_mlbapi._MLBAM_LEAGUEID_AL,
+        "name": "American",
+        "abbrev": "AL",
+    },
+    tools_mlbapi._MLBAM_LEAGUEID_NL: {
+        "id": tools_mlbapi._MLBAM_LEAGUEID_NL,
+        "name": "National",
+        "abbrev": "NL",
+    },
 }
 
 division_map = {
-  tools_mlbapi._MLBAM_DIVISIONID_AL_WEST: {
-    "shortname": "AL West",
-    "fullname": "American League West",
-  },
-  tools_mlbapi._MLBAM_DIVISIONID_AL_EAST: {
-    "shortname": "AL East",
-    "fullname": "American League East",
-  },
-  tools_mlbapi._MLBAM_DIVISIONID_AL_CENTRAL: {
-    "shortname": "AL Central",
-    "fullname": "American League Central",
-  },
-  tools_mlbapi._MLBAM_DIVISIONID_NL_WEST: {
-    "shortname": "NL West",
-    "fullname": "National League West",
-  },
-  tools_mlbapi._MLBAM_DIVISIONID_NL_EAST: {
-    "shortname": "NL East",
-    "fullname": "National League East",
-  },
-  tools_mlbapi._MLBAM_DIVISIONID_NL_CENTRAL: {
-    "shortname": "NL Central",
-    "fullname": "National League Central",
-  },
+    tools_mlbapi._MLBAM_DIVISIONID_AL_WEST: {
+        "shortname": "AL West",
+        "fullname": "American League West",
+    },
+    tools_mlbapi._MLBAM_DIVISIONID_AL_EAST: {
+        "shortname": "AL East",
+        "fullname": "American League East",
+    },
+    tools_mlbapi._MLBAM_DIVISIONID_AL_CENTRAL: {
+        "shortname": "AL Central",
+        "fullname": "American League Central",
+    },
+    tools_mlbapi._MLBAM_DIVISIONID_NL_WEST: {
+        "shortname": "NL West",
+        "fullname": "National League West",
+    },
+    tools_mlbapi._MLBAM_DIVISIONID_NL_EAST: {
+        "shortname": "NL East",
+        "fullname": "National League East",
+    },
+    tools_mlbapi._MLBAM_DIVISIONID_NL_CENTRAL: {
+        "shortname": "NL Central",
+        "fullname": "National League Central",
+    },
 }
 
 # create a list of the teams for a wildcard printout
@@ -68,59 +68,68 @@ for lg_id, league_data in league_map.items():
 
     for record_div in standings_data["records"]:
 
-        id_div = record_div['division']['id']
+        id_div = record_div["division"]["id"]
 
         for rank_tm, record_tm in enumerate(record_div["teamRecords"]):
 
-            name_team = record_tm['team']['name']
-            id_team = record_tm['team']['id']
+            name_team = record_tm["team"]["name"]
+            id_team = record_tm["team"]["id"]
 
-            wins_team = record_tm['wins']
-            losses_team = record_tm['losses']
-            wpct_team = wins_team/(wins_team+losses_team)
+            wins_team = record_tm["wins"]
+            losses_team = record_tm["losses"]
+            wpct_team = wins_team / (wins_team + losses_team)
             gb_team = record_tm["gamesBack"]
             wcgb_team = record_tm["wildCardGamesBack"]
             rs_team = record_tm["runsScored"]
             ra_team = record_tm["runsAllowed"]
             streak_team = record_tm["streak"]["streakCode"]
 
-            wc_list.append({
-                "name": name_team,
-                "id": id_team,
-                "wins": wins_team,
-                "losses": losses_team,
-                "wpct": wpct_team,
-                "wcgb": wcgb_team,
-                "streak": streak_team,
-                "lg_id": lg_id,
-                "div_id": id_div,
-                "lg_name": lg_name,
-                "div_name": division_map[id_div]["shortname"],
-                "div_rank": rank_tm+1,
-                "rs_team": rs_team,
-                "ra_team": ra_team,
-                "rd_team": rs_team - ra_team,
-            })
+            wc_list.append(
+                {
+                    "name": name_team,
+                    "id": id_team,
+                    "wins": wins_team,
+                    "losses": losses_team,
+                    "wpct": wpct_team,
+                    "wcgb": wcgb_team,
+                    "streak": streak_team,
+                    "lg_id": lg_id,
+                    "div_id": id_div,
+                    "lg_name": lg_name,
+                    "div_name": division_map[id_div]["shortname"],
+                    "div_rank": rank_tm + 1,
+                    "rs_team": rs_team,
+                    "ra_team": ra_team,
+                    "rd_team": rs_team - ra_team,
+                }
+            )
 
 
 # create and sort standings dataframe
 df_standings = pd.DataFrame(wc_list)
 df_standings.sort_values("wpct", ascending=False, inplace=True)
-df_standings.drop(columns=["id", "lg_id", "div_id",], inplace=True)
+df_standings.drop(
+    columns=[
+        "id",
+        "lg_id",
+        "div_id",
+    ],
+    inplace=True,
+)
 # df_standings.drop(columns=["id", "lg_id", "div_id", "lg_name",], inplace=True)
 
 # rename to final header names
 df_standings.rename(
     columns={
-        'name': 'TEAM',
-        'wins': 'W',
-        'losses': 'L',
-        'wpct': 'PCT',
-        'wcgb': 'WCGB',
-        'streak': 'STK',
-        'rs_team': 'RS',
-        'ra_team': 'RA',
-        'rd_team': 'RD',
+        "name": "TEAM",
+        "wins": "W",
+        "losses": "L",
+        "wpct": "PCT",
+        "wcgb": "WCGB",
+        "streak": "STK",
+        "rs_team": "RS",
+        "ra_team": "RA",
+        "rd_team": "RD",
     },
     inplace=True,
 )
@@ -147,33 +156,15 @@ head_line = "•"
 lg_lines = {
     "AL": {
         "head": "•",
-        "EAST": {
-            "head": "•",
-            "team_lines": ["•"]*5
-        },
-        "CENTRAL": {
-            "head": "•",
-            "team_lines": ["•"]*5
-        },
-        "WEST": {
-            "head": "•",
-            "team_lines": ["•"]*5
-        },
+        "EAST": {"head": "•", "team_lines": ["•"] * 5},
+        "CENTRAL": {"head": "•", "team_lines": ["•"] * 5},
+        "WEST": {"head": "•", "team_lines": ["•"] * 5},
     },
     "NL": {
         "head": "•",
-        "EAST": {
-            "head": "•",
-            "team_lines": ["•"]*5
-        },
-        "CENTRAL": {
-            "head": "•",
-            "team_lines": ["•"]*5
-        },
-        "WEST": {
-            "head": "•",
-            "team_lines": ["•"]*5
-        },
+        "EAST": {"head": "•", "team_lines": ["•"] * 5},
+        "CENTRAL": {"head": "•", "team_lines": ["•"] * 5},
+        "WEST": {"head": "•", "team_lines": ["•"] * 5},
     },
 }
 
@@ -185,34 +176,48 @@ for k, v in char_dict.items():
     head_line += " "
     sep_line += "•"
     for lg in ["AL", "NL"]:
-        lg_lines[lg]["head"] += " " # if k == "TEAM" else "•"
+        lg_lines[lg]["head"] += " "  # if k == "TEAM" else "•"
         for div in ["EAST", "CENTRAL", "WEST"]:
-            lg_lines[lg][div]["head"] += " " # if k == "TEAM" else "•"
-            for idx, row in df_standings[df_standings['div_name'].str.upper() == f"{lg} {div}"].reset_index().iterrows():
+            lg_lines[lg][div]["head"] += " "  # if k == "TEAM" else "•"
+            for idx, row in (
+                df_standings[df_standings["div_name"].str.upper() == f"{lg} {div}"]
+                .reset_index()
+                .iterrows()
+            ):
                 lg_lines[lg][div]["team_lines"][idx] += " "
-            
+
     head_line += f"{k:>{v}s}"
-    sep_line += "•"*v
+    sep_line += "•" * v
     for lg in ["AL", "NL"]:
         if k == "TEAM":
-            lg_lines[lg]["head"] += f"{'AMERICAN LEAGUE' if lg == 'AL' else 'NATIONAL LEAGUE':<{v}s}"
+            lg_lines[lg][
+                "head"
+            ] += f"{'AMERICAN LEAGUE' if lg == 'AL' else 'NATIONAL LEAGUE':<{v}s}"
         else:
-            lg_lines[lg]["head"] += " "*v
+            lg_lines[lg]["head"] += " " * v
         for div in ["EAST", "CENTRAL", "WEST"]:
             if k == "TEAM":
                 lg_lines[lg][div]["head"] += f"{' '*2 + lg + ' ' + div:<{v}s}"
             else:
                 lg_lines[lg][div]["head"] += f"{k:>{v}s}"
-            for idx, row in df_standings[df_standings['div_name'].str.upper() == f"{lg} {div}"].reset_index().iterrows():
+            for idx, row in (
+                df_standings[df_standings["div_name"].str.upper() == f"{lg} {div}"]
+                .reset_index()
+                .iterrows()
+            ):
                 lg_lines[lg][div]["team_lines"][idx] += f"{row[k]:>{v}}"
-    
+
     head_line += " •"
     sep_line += "••"
     for lg in ["AL", "NL"]:
         lg_lines[lg]["head"] += " •" if k == "TEAM" else " •"
         for div in ["EAST", "CENTRAL", "WEST"]:
             lg_lines[lg][div]["head"] += " •" if k == "TEAM" else " •"
-            for idx, row in df_standings[df_standings['div_name'].str.upper() == f"{lg} {div}"].reset_index().iterrows():
+            for idx, row in (
+                df_standings[df_standings["div_name"].str.upper() == f"{lg} {div}"]
+                .reset_index()
+                .iterrows()
+            ):
                 lg_lines[lg][div]["team_lines"][idx] += " •"
 
 # make a standard standings printout
@@ -254,4 +259,3 @@ for line in lg_lines["NL"]["WEST"]["team_lines"]:
     print(line)
 print(sep_line)
 print()
-

@@ -106,6 +106,7 @@ _MLBAM_DIVISIONID_NL_WEST = 203
 _MLBAM_DIVISIONID_NL_EAST = 204
 _MLBAM_DIVISIONID_NL_CENTRAL = 205
 
+
 class Team(object):
     """store a team"""
 

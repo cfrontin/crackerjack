@@ -7,11 +7,12 @@ from pprint import pprint
 import boxscore_cli.boxscore as boxscore
 import boxscore_cli.tools_mlbapi as tools_mlbapi
 
+
 def get_daily_games(
-        season=datetime.today().year,
-        fetch_today=True,
-        fetch_yesterday=False,
-        print_wide=False,
+    season=datetime.today().year,
+    fetch_today=True,
+    fetch_yesterday=False,
+    print_wide=False,
 ):
 
     mlbam_schedule_url = tools_mlbapi._MLB_SCHEDULE_FORMAT_STRING % (
@@ -31,8 +32,14 @@ def get_daily_games(
 
     for date in sched_data["dates"]:
         date_of_games = date["date"]
-        is_today = datetime.strptime(date_of_games, '%Y-%m-%d').date() == datetime.today().date()
-        is_yesterday = datetime.strptime(date_of_games, '%Y-%m-%d').date() == (datetime.today() - timedelta(1)).date()
+        is_today = (
+            datetime.strptime(date_of_games, "%Y-%m-%d").date()
+            == datetime.today().date()
+        )
+        is_yesterday = (
+            datetime.strptime(date_of_games, "%Y-%m-%d").date()
+            == (datetime.today() - timedelta(1)).date()
+        )
 
         total_games = 0
         scheduled_games = 0
@@ -101,7 +108,7 @@ def get_daily_games(
         }
 
         games_by_date[date_of_games] = games_thisday
-        
+
         if is_today and completed_games > 0:
             today = games_thisday
         if is_yesterday and completed_games > 0:
@@ -136,6 +143,7 @@ def get_daily_games(
             print(f"gamePk: {gamePk}")
             boxscore.print_linescore(gamePk, debug=False, wide=print_wide)
 
+
 def main():
     ### parse CLI arguments
 
@@ -151,9 +159,8 @@ def main():
 
     args = parser.parse_args()
 
-
-
     get_daily_games(fetch_today=args.today, fetch_yesterday=args.yesterday)
+
 
 if __name__ == "__main__":
     main()
