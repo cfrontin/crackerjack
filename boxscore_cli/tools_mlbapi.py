@@ -10,6 +10,7 @@ _PKG_DIR = os.path.join(_APP_DIR, os.pardir)  # where this package is installed
 _MLB_GAME_FORMAT_STRING = "http://statsapi.mlb.com/api/v1.1/game/%s/feed/live?hydrate=officials"  # 6 digit numeric gamepk as string
 _MLB_SCHEDULE_FORMAT_STRING = "http://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=%s&endDate=%s"  # dates as string: '2023-01-01'
 _MLB_STANDINGS_FORMAT_STRING = "http://statsapi.mlb.com/api/v1/standings?leagueId=%s"  # 3 digit numeric leagueId as string
+_MLB_TEAM_GAMES_FORMAT_STRING = "http://statsapi.mlb.com/api/v1/schedule?teamId=%s&sportId=1&season=%s"  # numeric team id, season as string
 
 # things known to the mlbapi
 _MLBAM_GAME_LABELS = [
