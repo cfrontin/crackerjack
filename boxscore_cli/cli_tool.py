@@ -51,7 +51,7 @@ signal.signal(signal.SIGINT, ctrlc_handler)
 print_wide = False
 
 
-def cli_loop():
+def main():
     while True:
         mode = inquirer.list_input(
             message="Welcome to boxscore_cli. What would you like to view?",
@@ -163,4 +163,4 @@ def cli_loop():
 
 
 if __name__ == "__main__":
-    cli_loop()
+    main()

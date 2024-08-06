@@ -20,6 +20,7 @@ classifiers = [
 packages = ["boxscore_cli",]
 
 [project.scripts]
-boxscore = "boxscore_cli.boxscore:main"
-fetchscores = "boxscore_cli.fetch_schedule:main"
+# boxscore = "boxscore_cli.boxscore:main"
+# fetchscores = "boxscore_cli.fetch_schedule:main"
+crackerjack = "boxscore_cli.cli_tool:main"
 

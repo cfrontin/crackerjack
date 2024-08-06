@@ -10,11 +10,11 @@ from colorama import Fore, Back, Style
 # import boxscore_cli.boxscore as boxscore
 import boxscore_cli.tools_mlbapi as tools_mlbapi
 
-from formatters_boxscore import _CLI_LINE_LENGTH_DEFAULT
-from formatters_boxscore import _CLI_LINE_LENGTH_WIDE_DEFAULT
-from tools_mlbapi import _MLB_TEAM_GAMES_FORMAT_STRING
+from boxscore_cli.formatters_boxscore import _CLI_LINE_LENGTH_DEFAULT
+from boxscore_cli.formatters_boxscore import _CLI_LINE_LENGTH_WIDE_DEFAULT
+from boxscore_cli.tools_mlbapi import _MLB_TEAM_GAMES_FORMAT_STRING
 
-from team_lookup import team_list
+from boxscore_cli.team_lookup import team_list
 
 
 def run_sparkline(season=datetime.now().year):

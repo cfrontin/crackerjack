@@ -13,8 +13,8 @@ from colorama import Fore, Back, Style
 # import boxscore_cli.boxscore as boxscore
 import boxscore_cli.tools_mlbapi as tools_mlbapi
 
-from formatters_boxscore import _CLI_LINE_LENGTH_DEFAULT
-from formatters_boxscore import _CLI_LINE_LENGTH_WIDE_DEFAULT
+from boxscore_cli.formatters_boxscore import _CLI_LINE_LENGTH_DEFAULT
+from boxscore_cli.formatters_boxscore import _CLI_LINE_LENGTH_WIDE_DEFAULT
 
 league_map = {
     tools_mlbapi._MLBAM_LEAGUEID_AL: {
