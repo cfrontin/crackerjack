@@ -32,6 +32,47 @@ def print_linescore(gamePk, debug=False, wide=False):
     print()
 
 
+def do_box(gamePk, debug=False, wide=False):
+    game_data = download_game_data(gamePk, debug=debug)
+    # print("\n")
+    print(extract_gamedate(game_data))
+    print(extract_venue_name(game_data))
+    print()
+    lines_dense, lines_sparse = format_linescore(
+        extract_linescore_innings(game_data),
+        extract_teams_data(game_data),
+        use_top_spacing_line=False,
+        use_bottom_spacing_line=False,
+        horz_char=" ",
+        vert_char=" ",
+        cross_char=" ",
+        wide_display=wide,
+    )
+    do_dense = True
+    if do_dense:
+        [print(line) for line in lines_dense]
+    else:
+        [print(line) for line in lines_sparse]
+    print()
+    batter_list = extract_boxscore_batter(game_data)
+    pitcher_list = extract_boxscore_pitcher(game_data)
+    line_batters_dict = format_batters(batter_list, wide_display=wide)
+    line_pitchers_dict = format_pitchers(pitcher_list, wide_display=wide)
+    for tmkey in ("away", "home"):
+        print("  ", extract_teams_data(game_data)[tmkey], sep="")
+        print()
+        [print(x) for x in line_batters_dict[tmkey]]
+        print()
+        [print(x) for x in line_pitchers_dict[tmkey]]
+        print()
+        info_line_tmkey = extract_info_team(game_data, home_team=(tmkey == "home"))
+        [print(x) for x in format_info_team(info_line_tmkey, wide_display=wide)]
+        print()
+    info_line_box = extract_info_box(game_data)
+    [print(x) for x in format_info_box(info_line_box, wide_display=wide)]
+    print()
+
+
 def main():
     ### parse CLI arguments
 
@@ -54,47 +95,8 @@ def main():
         print_linescore(args.game, debug=args.debug, wide=args.wide)
 
     if args.box:
-        game_data = download_game_data(args.game, debug=args.debug)
-        print("\n")
-        print(extract_gamedate(game_data))
-        print(extract_venue_name(game_data))
         print()
-        lines_dense, lines_sparse = format_linescore(
-            extract_linescore_innings(game_data),
-            extract_teams_data(game_data),
-            use_top_spacing_line=False,
-            use_bottom_spacing_line=False,
-            horz_char=" ",
-            vert_char=" ",
-            cross_char=" ",
-            wide_display=args.wide,
-        )
-        do_dense = True
-        if do_dense:
-            [print(line) for line in lines_dense]
-        else:
-            [print(line) for line in lines_sparse]
-        print()
-        batter_list = extract_boxscore_batter(game_data)
-        pitcher_list = extract_boxscore_pitcher(game_data)
-        line_batters_dict = format_batters(batter_list, wide_display=args.wide)
-        line_pitchers_dict = format_pitchers(pitcher_list, wide_display=args.wide)
-        for tmkey in ("away", "home"):
-            print("  ", extract_teams_data(game_data)[tmkey], sep="")
-            print()
-            [print(x) for x in line_batters_dict[tmkey]]
-            print()
-            [print(x) for x in line_pitchers_dict[tmkey]]
-            print()
-            info_line_tmkey = extract_info_team(game_data, home_team=(tmkey == "home"))
-            [
-                print(x)
-                for x in format_info_team(info_line_tmkey, wide_display=args.wide)
-            ]
-            print()
-        info_line_box = extract_info_box(game_data)
-        [print(x) for x in format_info_box(info_line_box, wide_display=args.wide)]
-        print()
+        do_box(args.game, args.debug)
 
     # if args.game and (not args.line) and (not args.box):  # exploration mode
     #     game_data = download_game_data(args.game, debug=args.debug)

@@ -3,17 +3,19 @@ import sys
 from datetime import datetime
 import pprint
 
+from boxscore_cli.boxscore import do_box
 import inquirer
 import signal
 
+from boxscore_cli.fetch_schedule import get_daily_linescores
 from boxscore_cli.fetch_schedule import get_daily_games
-from boxscore_cli.prototype_fetch_standings import run_standings
-from boxscore_cli.prototype_fetch_standings import run_wildcard
+from boxscore_cli.fetch_standings import run_standings
+from boxscore_cli.fetch_standings import run_wildcard
 from boxscore_cli.sparkline import run_sparkline
 
-def signal_handler(sig, frame):
+
+def ctrlc_handler(sig, frame):
     print("\n\nGet up! Get up! Get outta here! GONE!\n\t-Bob Uecker\n")
-    # Perform any cleanup here
     sys.exit(0)
 
 
@@ -42,10 +44,12 @@ def get_date():
         else:
             print("Invalid date format. Please try again.")
 
+
 # register the signal handler
-signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGINT, ctrlc_handler)
 
 print_wide = False
+
 
 def cli_loop():
     while True:
@@ -53,7 +57,7 @@ def cli_loop():
             message="Welcome to boxscore_cli. What would you like to view?",
             choices=[
                 "linescores",
-                ("all boxscores", "boxscores"),
+                # ("all boxscores", "boxscores"),
                 ("a specific boxscore", "boxscore"),
                 ("divisional standings", "standings_div"),
                 ("league standings", "standings_lg"),
@@ -61,8 +65,6 @@ def cli_loop():
                 ("the command line (exit)", "exit"),
             ],
         )
-
-        print(f"DEBUG!!!!! mode: {mode}")
 
         if mode == "linescores":
             date = inquirer.list_input(
@@ -76,20 +78,20 @@ def cli_loop():
             if date == "date":
                 date = get_date()
 
-                get_daily_games(
+                get_daily_linescores(
                     fetch_today=False,
                     fetch_yesterday=False,
                     fetch_target_date=date,
                     print_wide=print_wide,
                 )
             elif date == "today":
-                get_daily_games(
+                get_daily_linescores(
                     fetch_today=True,
                     fetch_yesterday=False,
                     print_wide=print_wide,
                 )
             elif date == "yesterday":
-                get_daily_games(
+                get_daily_linescores(
                     fetch_today=False,
                     fetch_yesterday=True,
                     print_wide=print_wide,
@@ -103,8 +105,43 @@ def cli_loop():
             raise NotImplementedError(f"mode {mode} has not been implemented yet!")
 
         elif mode == "boxscore":
-            date = get_date()
-            raise NotImplementedError(f"mode {mode} has not been implemented yet!")
+            date = inquirer.list_input(
+                message="Which day do you want to retrive a boxscore for?",
+                choices=[
+                    "yesterday",
+                    "today",
+                    ("specified date", "date"),
+                ],
+            )
+            if date == "date":
+                date = get_date()
+
+                games_to_do = get_daily_games(
+                    fetch_today=False,
+                    fetch_yesterday=False,
+                    fetch_target_date=date,
+                )
+            elif date == "today":
+                games_to_do = get_daily_games(
+                    fetch_today=True,
+                    fetch_yesterday=False,
+                )
+            elif date == "yesterday":
+                games_to_do = get_daily_games(
+                    fetch_today=False,
+                    fetch_yesterday=True,
+                )
+            else:
+                raise NotImplementedError(
+                    f"boxscore date option {date} has not been implemented yet!"
+                )
+
+            gamePk = inquirer.list_input(
+                message="Which game do you want to retrive a boxscore for?",
+                choices=games_to_do["completed"],
+            )
+
+            do_box(gamePk)
 
         elif mode == "standings_div":
             run_standings()
@@ -118,10 +155,12 @@ def cli_loop():
             print()
 
         elif mode == "exit":
-            break
+            print("It might be, it could be, it is! A home run!\n\t-Harry Caray\n")
+            sys.exit(0)
 
         else:
             raise NotImplementedError(f"mode {mode} has not been implemented yet!")
+
 
 if __name__ == "__main__":
     cli_loop()
