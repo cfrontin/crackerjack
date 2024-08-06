@@ -12,8 +12,14 @@ def get_daily_games(
     season=datetime.today().year,
     fetch_today=True,
     fetch_yesterday=False,
+    fetch_target_date=False,
     print_wide=False,
 ):
+
+    # override season if user requests a specific date
+    if fetch_target_date:
+        assert not fetch_today and not fetch_yesterday
+        season = datetime.strptime(fetch_target_date, "%Y-%m-%d").year
 
     mlbam_schedule_url = tools_mlbapi._MLB_SCHEDULE_FORMAT_STRING % (
         f"{season}-01-01",
@@ -29,6 +35,7 @@ def get_daily_games(
 
     today = None
     yesterday = None
+    tgt_day = None
 
     for date in sched_data["dates"]:
         date_of_games = date["date"]
@@ -39,6 +46,10 @@ def get_daily_games(
         is_yesterday = (
             datetime.strptime(date_of_games, "%Y-%m-%d").date()
             == (datetime.today() - timedelta(1)).date()
+        )
+        is_tgt_day = fetch_target_date and (
+            datetime.strptime(date_of_games, "%Y-%m-%d").date()
+            == (datetime.strptime(fetch_target_date, "%Y-%m-%d").date())
         )
 
         total_games = 0
@@ -113,6 +124,8 @@ def get_daily_games(
             today = games_thisday
         if is_yesterday and completed_games > 0:
             yesterday = games_thisday
+        if is_tgt_day and completed_games > 0:
+            tgt_day = games_thisday
 
     gamecount_by_date = dict(sorted(gamecount_by_date.items()))
     days_with_completed = [
@@ -138,7 +151,16 @@ def get_daily_games(
                 print(f"gamePk: {gamePk}")
                 boxscore.print_linescore(gamePk, debug=False, wide=print_wide)
 
-    else:
+    if fetch_target_date:
+        print(f"\nGAMES ON {fetch_target_date}:\n")
+        if tgt_day is None:
+            print(f"No games completed on {fetch_target_date}.\n")
+        else:
+            for gamePk in tgt_day["completed"]:
+                print(f"gamePk: {gamePk}")
+                boxscore.print_linescore(gamePk, debug=False, wide=print_wide)
+
+    if (not fetch_today) and (not fetch_yesterday) and (not fetch_target_date):
         for gamePk in games_by_date[last_day_completed]["completed"]:
             print(f"gamePk: {gamePk}")
             boxscore.print_linescore(gamePk, debug=False, wide=print_wide)

@@ -56,6 +56,7 @@ division_map = {
     },
 }
 
+
 def run_standings():
 
     # create a list of the teams for a wildcard printout
@@ -63,7 +64,9 @@ def run_standings():
     for lg_id, league_data in league_map.items():
         lg_name = league_data["abbrev"]
 
-        mlbam_standings_url = tools_mlbapi._MLB_STANDINGS_FORMAT_STRING % league_data["id"]
+        mlbam_standings_url = (
+            tools_mlbapi._MLB_STANDINGS_FORMAT_STRING % league_data["id"]
+        )
         standings_data = tools_mlbapi.download_json_url(
             mlbam_standings_url,
         )
@@ -105,7 +108,6 @@ def run_standings():
                         "rd_team": rs_team - ra_team,
                     }
                 )
-
 
     # create and sort standings dataframe
     df_standings = pd.DataFrame(wc_list)
@@ -269,7 +271,9 @@ def run_wildcard():
     for lg_id, league_data in league_map.items():
         lg_name = league_data["abbrev"]
 
-        mlbam_standings_url = tools_mlbapi._MLB_STANDINGS_FORMAT_STRING % league_data["id"]
+        mlbam_standings_url = (
+            tools_mlbapi._MLB_STANDINGS_FORMAT_STRING % league_data["id"]
+        )
         standings_data = tools_mlbapi.download_json_url(
             mlbam_standings_url,
         )
@@ -311,7 +315,6 @@ def run_wildcard():
                         "rd_team": rs_team - ra_team,
                     }
                 )
-
 
     # create and sort standings dataframe
     df_standings = pd.DataFrame(wc_list)
@@ -374,7 +377,9 @@ def run_wildcard():
 
     # make the pct pretty
     df_standings.PCT = [f"{np.round(v,3):5.03f}" for v in df_standings.PCT]
-    df_standings.DIV = df_standings.DIV.str[3:].str[0].str.cat(df_standings.RK.astype(str))
+    df_standings.DIV = (
+        df_standings.DIV.str[3:].str[0].str.cat(df_standings.RK.astype(str))
+    )
 
     # loop over the dictionary of columns
     for k, v in char_dict.items():
@@ -384,7 +389,8 @@ def run_wildcard():
             lg_lines[lg]["head"] += " "  # if k == "TEAM" else "•"
             for idx, row in (
                 df_standings[
-                    (df_standings["lg_name"].str.upper() == lg) & (df_standings["RK"] == 1)
+                    (df_standings["lg_name"].str.upper() == lg)
+                    & (df_standings["RK"] == 1)
                 ]
                 .reset_index()
                 .iterrows()
@@ -392,7 +398,8 @@ def run_wildcard():
                 lg_lines[lg]["leader_lines"][idx] += " "
             for idx, row in (
                 df_standings[
-                    (df_standings["lg_name"].str.upper() == lg) & (df_standings["RK"] != 1)
+                    (df_standings["lg_name"].str.upper() == lg)
+                    & (df_standings["RK"] != 1)
                 ]
                 .reset_index()
                 .iterrows()
@@ -410,7 +417,8 @@ def run_wildcard():
                 lg_lines[lg]["head"] += f"{k:>{v}s}"  # " "*v
             for idx, row in (
                 df_standings[
-                    (df_standings["lg_name"].str.upper() == lg) & (df_standings["RK"] == 1)
+                    (df_standings["lg_name"].str.upper() == lg)
+                    & (df_standings["RK"] == 1)
                 ]
                 .reset_index()
                 .iterrows()
@@ -418,7 +426,8 @@ def run_wildcard():
                 lg_lines[lg]["leader_lines"][idx] += f"{row[k]:>{v}}"
             for idx, row in (
                 df_standings[
-                    (df_standings["lg_name"].str.upper() == lg) & (df_standings["RK"] != 1)
+                    (df_standings["lg_name"].str.upper() == lg)
+                    & (df_standings["RK"] != 1)
                 ]
                 .reset_index()
                 .iterrows()
@@ -431,7 +440,8 @@ def run_wildcard():
             lg_lines[lg]["head"] += " •" if k == "TEAM" else " •"
             for idx, row in (
                 df_standings[
-                    (df_standings["lg_name"].str.upper() == lg) & (df_standings["RK"] == 1)
+                    (df_standings["lg_name"].str.upper() == lg)
+                    & (df_standings["RK"] == 1)
                 ]
                 .reset_index()
                 .iterrows()
@@ -439,7 +449,8 @@ def run_wildcard():
                 lg_lines[lg]["leader_lines"][idx] += " •"
             for idx, row in (
                 df_standings[
-                    (df_standings["lg_name"].str.upper() == lg) & (df_standings["RK"] != 1)
+                    (df_standings["lg_name"].str.upper() == lg)
+                    & (df_standings["RK"] != 1)
                 ]
                 .reset_index()
                 .iterrows()
@@ -469,6 +480,7 @@ def run_wildcard():
         print(line)
     print(sep_line)
     print()
+
 
 if __name__ == "__main__":
     print()

@@ -1,8 +1,21 @@
-import pprint
-import inquirer
-from datetime import datetime
+import sys
 
-from sparkline import run_sparkline
+from datetime import datetime
+import pprint
+
+import inquirer
+import signal
+
+from boxscore_cli.fetch_schedule import get_daily_games
+from boxscore_cli.prototype_fetch_standings import run_standings
+from boxscore_cli.prototype_fetch_standings import run_wildcard
+from boxscore_cli.sparkline import run_sparkline
+
+def signal_handler(sig, frame):
+    print("\nGet up! Get up! Get outta here! GONE!\n\t-Bob Uecker")
+    # Perform any cleanup here
+    sys.exit(0)
+
 
 def is_valid_date(date_str):
     """Check if the provided date string is a valid date."""
@@ -28,6 +41,11 @@ def get_date():
             return date_input
         else:
             print("Invalid date format. Please try again.")
+
+# register the signal handler
+signal.signal(signal.SIGINT, signal_handler)
+
+print_wide = False
 
 def cli_loop():
     while True:
@@ -55,15 +73,27 @@ def cli_loop():
                     ("specified date", "date"),
                 ],
             )
-            print(f"DEBUG!!!!! date: {date}")
             if date == "date":
-                raise NotImplementedError(
-                    f"date specification for linescores has not been implemented yet!"
+                date = get_date()
+
+                get_daily_games(
+                    fetch_today=False,
+                    fetch_yesterday=False,
+                    fetch_target_date=date,
+                    print_wide=print_wide,
                 )
             elif date == "today":
-                print("DEBUG!!!!! PRINT TODAY'S LINESCORES")
+                get_daily_games(
+                    fetch_today=True,
+                    fetch_yesterday=False,
+                    print_wide=print_wide,
+                )
             elif date == "yesterday":
-                print("DEBUG!!!!! PRINT YESTERDAY'S LINESCORES")
+                get_daily_games(
+                    fetch_today=False,
+                    fetch_yesterday=True,
+                    print_wide=print_wide,
+                )
             else:
                 raise NotImplementedError(
                     f"linescore date option {date} has not been implemented yet!"
@@ -77,10 +107,10 @@ def cli_loop():
             raise NotImplementedError(f"mode {mode} has not been implemented yet!")
 
         elif mode == "standings_div":
-            raise NotImplementedError(f"mode {mode} has not been implemented yet!")
+            run_standings()
 
-        elif mode == "standings_wc":
-            raise NotImplementedError(f"mode {mode} has not been implemented yet!")
+        elif mode == "standings_lg":
+            run_wildcard()
 
         elif mode == "sparklines":
             print()
