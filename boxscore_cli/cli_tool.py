@@ -12,7 +12,7 @@ from boxscore_cli.prototype_fetch_standings import run_wildcard
 from boxscore_cli.sparkline import run_sparkline
 
 def signal_handler(sig, frame):
-    print("\nGet up! Get up! Get outta here! GONE!\n\t-Bob Uecker")
+    print("\n\nGet up! Get up! Get outta here! GONE!\n\t-Bob Uecker\n")
     # Perform any cleanup here
     sys.exit(0)
 
@@ -68,8 +68,8 @@ def cli_loop():
             date = inquirer.list_input(
                 message="Which day do you want to retrive linescores for?",
                 choices=[
-                    "today",
                     "yesterday",
+                    "today",
                     ("specified date", "date"),
                 ],
             )
