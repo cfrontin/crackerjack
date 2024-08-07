@@ -294,7 +294,6 @@ def get_daily_linescores(
             print("No games completed yesterday.\n")
         else:
             for gamePk in yesterday["completed"]:
-                print(f"gamePk: {gamePk}")
                 boxscore.print_linescore(gamePk, debug=False, wide=print_wide)
 
     if fetch_today:
@@ -303,7 +302,6 @@ def get_daily_linescores(
             print("No games completed yet today.\n")
         else:
             for gamePk in today["completed"]:
-                print(f"gamePk: {gamePk}")
                 boxscore.print_linescore(gamePk, debug=False, wide=print_wide)
 
     if fetch_target_date:
@@ -312,12 +310,10 @@ def get_daily_linescores(
             print(f"No games completed on {fetch_target_date}.\n")
         else:
             for gamePk in tgt_day["completed"]:
-                print(f"gamePk: {gamePk}")
                 boxscore.print_linescore(gamePk, debug=False, wide=print_wide)
 
     if (not fetch_today) and (not fetch_yesterday) and (not fetch_target_date):
         for gamePk in games_by_date[last_day_completed]["completed"]:
-            print(f"gamePk: {gamePk}")
             boxscore.print_linescore(gamePk, debug=False, wide=print_wide)
 
 
