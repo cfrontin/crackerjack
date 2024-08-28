@@ -1,5 +1,7 @@
 # `crackerjack`
 
+![Cracker Jack surprise inside logo](https://live.staticflickr.com/3662/3331692605_5b0ef798b5_c.jpg?w=400)
+
 A CLI boxscore generator.
 
 The newspaper boxscore was basically a perfect way to aggregate data about a given day's games.
