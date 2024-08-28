@@ -1,4 +1,4 @@
-# boxscore-cli
+# `crackerjack`
 
 A CLI boxscore generator.
 
