@@ -1,6 +1,6 @@
 # `crackerjack`
 
-![Cracker Jack surprise inside logo](https://live.staticflickr.com/3662/3331692605_5b0ef798b5_c.jpg?w=400)
+[![Cracker Jack surprise inside logo](https://live.staticflickr.com/3662/3331692605_5b0ef798b5_c.jpg?w=400)](https://flickr.com/photos/hermanturnip/3331692605)
 
 A CLI boxscore generator.
 
