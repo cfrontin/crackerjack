@@ -3,7 +3,7 @@ import json
 import os
 import urllib.request
 
-from boxscore_cli.tools_linescore import LineScoreInning
+from crackerjack.tools_linescore import LineScoreInning
 
 _APP_DIR = os.path.split(__file__)[0]  # where this file is installed
 _PKG_DIR = os.path.join(_APP_DIR, os.pardir)  # where this package is installed

@@ -1,21 +1,14 @@
 #!/usr/bin/env python3
 
-import os
-import os.path
 import argparse
-import json
-import copy
-import re
 
-import pprint as pp
-
-from boxscore_cli.tools_mlbapi import *
-from boxscore_cli.tools_linescore import *
-from boxscore_cli.tools_boxscore import *
-from boxscore_cli.tools_boxscore import *
-from boxscore_cli.extractors_boxscore import *
-from boxscore_cli.formatters_linescore import *
-from boxscore_cli.formatters_boxscore import *
+from crackerjack.tools_mlbapi import *
+from crackerjack.tools_linescore import *
+from crackerjack.tools_boxscore import *
+from crackerjack.tools_boxscore import *
+from crackerjack.extractors_boxscore import *
+from crackerjack.formatters_linescore import *
+from crackerjack.formatters_boxscore import *
 
 
 def print_linescore(gamePk, debug=False, wide=False):

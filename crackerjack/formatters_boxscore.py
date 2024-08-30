@@ -1,7 +1,7 @@
 from collections import OrderedDict
 
-import boxscore_cli.tools_mlbapi as tools_mlbapi
-from boxscore_cli.tools_boxscore import *
+import crackerjack.tools_mlbapi as tools_mlbapi
+from crackerjack.tools_boxscore import *
 
 # this should be reconfigured to be part of a settings file
 _CLI_LINE_LENGTH_DEFAULT = 80

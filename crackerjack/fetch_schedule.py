@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 import argparse
 from pprint import pprint
 
-import boxscore_cli.team_lookup
-import boxscore_cli.boxscore as boxscore
-import boxscore_cli.tools_mlbapi as tools_mlbapi
+import crackerjack.team_lookup
+import crackerjack.boxscore as boxscore
+import crackerjack.tools_mlbapi as tools_mlbapi
 
 
 def get_daily_games(
@@ -82,14 +82,14 @@ def get_daily_games(
             # get a quick description of the game
             teamID_away = int(game["teams"]["away"]["team"]["id"])
             teamID_home = int(game["teams"]["home"]["team"]["id"])
-            if teamID_away in boxscore_cli.team_lookup.team_list.keys():
-                threeletter_away = boxscore_cli.team_lookup.team_list[
+            if teamID_away in crackerjack.team_lookup.team_list.keys():
+                threeletter_away = crackerjack.team_lookup.team_list[
                     int(game["teams"]["away"]["team"]["id"])
                 ].get("abbreviation")
             else:
                 threeletter_away = "XXX"  # DEBUG!!!!!
-            if teamID_home in boxscore_cli.team_lookup.team_list.keys():
-                threeletter_home = boxscore_cli.team_lookup.team_list[
+            if teamID_home in crackerjack.team_lookup.team_list.keys():
+                threeletter_home = crackerjack.team_lookup.team_list[
                     int(game["teams"]["home"]["team"]["id"])
                 ].get("abbreviation")
             else:

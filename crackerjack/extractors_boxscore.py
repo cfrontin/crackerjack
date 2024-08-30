@@ -2,9 +2,9 @@ import copy
 import re
 from collections import OrderedDict
 
-from boxscore_cli.tools_mlbapi import *
-import boxscore_cli.tools_mlbapi as tools_mlbapi
-from boxscore_cli.tools_boxscore import *
+from crackerjack.tools_mlbapi import *
+import crackerjack.tools_mlbapi as tools_mlbapi
+from crackerjack.tools_boxscore import *
 
 
 def extract_info_box(

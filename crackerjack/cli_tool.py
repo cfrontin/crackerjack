@@ -3,15 +3,15 @@ import sys
 from datetime import datetime
 import pprint
 
-from boxscore_cli.boxscore import do_box
+from crackerjack.boxscore import do_box
 import inquirer
 import signal
 
-from boxscore_cli.fetch_schedule import get_daily_linescores
-from boxscore_cli.fetch_schedule import get_daily_games
-from boxscore_cli.fetch_standings import run_standings
-from boxscore_cli.fetch_standings import run_wildcard
-from boxscore_cli.sparkline import run_sparkline
+from crackerjack.fetch_schedule import get_daily_linescores
+from crackerjack.fetch_schedule import get_daily_games
+from crackerjack.fetch_standings import run_standings
+from crackerjack.fetch_standings import run_wildcard
+from crackerjack.sparkline import run_sparkline
 
 
 def ctrlc_handler(sig, frame):
@@ -54,7 +54,7 @@ print_wide = False
 def main():
     while True:
         mode = inquirer.list_input(
-            message="Welcome to boxscore_cli. What would you like to view?",
+            message="Welcome to crackerjack. What would you like to view?",
             choices=[
                 "linescores",
                 # ("all boxscores", "boxscores"),

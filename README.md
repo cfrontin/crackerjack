@@ -12,7 +12,11 @@ Nowadays, nobody reads physical papers anymore, but nerds still use command line
 
 Dependencies:
 
-  - none, so far
+  - setuptools: package development and distribution library 
+  - [`inquirer`:](https://python-inquirer.readthedocs.io/en/latest/usage.html) a CLI navigation library
+  - [`colorama`:](https://github.com/tartley/colorama) a library for coloring CLI outputs
+  - [`numpy`:](https://numpy.org) for numerical computations
+  - [`pandas`:](https://pandas.pydata.org/) data loading and analysis
 
 Instructions:
 

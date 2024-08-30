@@ -1,10 +1,10 @@
 
 [build-system]
-requires = ["setuptools",]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "boxscore-cli"
+name = "crackerjack"
 version = "0.0.0a1"
 authors = [{name = "Cory Frontin", email = "charlievictorfoxtrot@gmail.com"},]
 description = "A boxscore app for your 80-character CLI"
@@ -14,13 +14,19 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Operating System :: OS Independent",
 ]
+dependencies = [
+  "numpy",
+  "pandas",
+  "inquirer",
+  "colorama"
+]
 # license_files = LICENSE.txt
 
 [tool.setuptools]
-packages = ["boxscore_cli",]
+packages = ["crackerjack",]
 
 [project.scripts]
-# boxscore = "boxscore_cli.boxscore:main"
-# fetchscores = "boxscore_cli.fetch_schedule:main"
-crackerjack = "boxscore_cli.cli_tool:main"
+# boxscore = "crackerjack.boxscore:main"
+# fetchscores = "crackerjack.fetch_schedule:main"
+crackerjack = "crackerjack.cli_tool:main"
 

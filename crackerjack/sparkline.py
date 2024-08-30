@@ -7,14 +7,14 @@ from re import S
 
 from colorama import Fore, Back, Style
 
-# import boxscore_cli.boxscore as boxscore
-import boxscore_cli.tools_mlbapi as tools_mlbapi
+# import crackerjack.boxscore as boxscore
+import crackerjack.tools_mlbapi as tools_mlbapi
 
-from boxscore_cli.formatters_boxscore import _CLI_LINE_LENGTH_DEFAULT
-from boxscore_cli.formatters_boxscore import _CLI_LINE_LENGTH_WIDE_DEFAULT
-from boxscore_cli.tools_mlbapi import _MLB_TEAM_GAMES_FORMAT_STRING
+from crackerjack.formatters_boxscore import _CLI_LINE_LENGTH_DEFAULT
+from crackerjack.formatters_boxscore import _CLI_LINE_LENGTH_WIDE_DEFAULT
+from crackerjack.tools_mlbapi import _MLB_TEAM_GAMES_FORMAT_STRING
 
-from boxscore_cli.team_lookup import team_list
+from crackerjack.team_lookup import team_list
 
 
 def run_sparkline(season=datetime.now().year):
