@@ -32,3 +32,21 @@ Instructions:
 ## Operation (beta mode)
 
 Type `crackerjack` at the command line after installing.
+
+This will drop you into a menu:
+
+![`crackerjack` menu demo](assets/menu_demo.png)
+
+From there, you can navigate to the features of crackerjack.
+These are line scores:
+
+![`crackerjack` linescore demo](assets/linescore_demo.png)
+
+Oof. [Tough night for the Red Sox](https://www.youtube.com/watch?v=lGMhfYftFCk).
+Also boxscores:
+
+![`crackerjack` boxscore demo](assets/boxscore_demo.png)
+
+There's also standings, and [standings sparklines](https://en.wikipedia.org/wiki/Sparkline):
+
+![`crackerjack` sparklines demo](assets/sparklines_demo.png)
