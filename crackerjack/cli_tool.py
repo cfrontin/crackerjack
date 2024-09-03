@@ -52,6 +52,7 @@ print_wide = False
 
 
 def main():
+    print()
     while True:
         mode = inquirer.list_input(
             message="Welcome to crackerjack. What would you like to view?",
