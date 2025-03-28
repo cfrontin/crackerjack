@@ -82,12 +82,12 @@ def run_standings():
 
                 wins_team = record_tm["wins"]
                 losses_team = record_tm["losses"]
-                wpct_team = wins_team / (wins_team + losses_team)
+                wpct_team = wins_team / (wins_team + losses_team) if wins_team + losses_team else 0.0
                 gb_team = record_tm["gamesBack"]
                 wcgb_team = record_tm["wildCardGamesBack"]
                 rs_team = record_tm["runsScored"]
                 ra_team = record_tm["runsAllowed"]
-                streak_team = record_tm["streak"]["streakCode"]
+                streak_team = record_tm["streak"]["streakCode"] if "streak" in record_tm else ""
 
                 wc_list.append(
                     {
@@ -292,12 +292,12 @@ def run_wildcard():
 
                 wins_team = record_tm["wins"]
                 losses_team = record_tm["losses"]
-                wpct_team = wins_team / (wins_team + losses_team)
+                wpct_team = wins_team / (wins_team + losses_team) if wins_team + losses_team else 0.0
                 gb_team = record_tm["gamesBack"]
                 wcgb_team = record_tm["wildCardGamesBack"]
                 rs_team = record_tm["runsScored"]
                 ra_team = record_tm["runsAllowed"]
-                streak_team = record_tm["streak"]["streakCode"]
+                streak_team = record_tm["streak"]["streakCode"] if "streak" in record_tm else ""
 
                 wc_list.append(
                     {

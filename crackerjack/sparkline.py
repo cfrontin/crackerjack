@@ -51,14 +51,14 @@ def run_sparkline(season=datetime.now().year):
 
         wins = sum(wins_vec)
         losses = sum([not v for v in wins_vec])
-        wpct = wins / (wins + losses)
+        wpct = wins / (wins + losses if wins + losses else 1)
 
         # char_available = _CLI_LINE_LENGTH_DEFAULT - 2
         char_available = _CLI_LINE_LENGTH_WIDE_DEFAULT - 2
 
         if char_available > len(wins_vec):
             output_lines = (
-                f"{team_data["abbreviation"]:>3s} "
+                f"{team_data['abbreviation']:>3s} "
                 + f"{sum(wins_vec)}-{sum([not v for v in wins_vec])}:\n"
             )
 
@@ -71,7 +71,7 @@ def run_sparkline(season=datetime.now().year):
             wins_vec_working = wins_vec.copy()
 
             output_lines = (
-                f"{team_data["abbreviation"]:>4s} "
+                f"{team_data['abbreviation']:>4s} "
                 + f"{sum(wins_vec)}-{sum([not v for v in wins_vec])}:\n"
             )
 
